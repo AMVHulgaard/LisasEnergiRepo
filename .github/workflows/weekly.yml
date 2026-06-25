@@ -1,0 +1,47 @@
+name: Weekly energy update
+
+on:
+  schedule:
+    - cron: '0 6 * * 3'   # Onsdag kl. 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run script
+        env:
+          TENANT_ID: ${{ secrets.TENANT_ID }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          SENDER_UPN: ${{ secrets.SENDER_UPN }}
+          RECIPIENT_1: ${{ secrets.RECIPIENT_1 }}
+          RECIPIENT_2: ${{ secrets.RECIPIENT_2 }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python main.py
+
+      - name: Gem state.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json 2>/dev/null || true
+          if ! git diff --staged --quiet; then
+            git commit -m "Opdatér state.json [skip ci]"
+            git push
+          fi
