@@ -68,6 +68,20 @@ NEWS_SOURCES = [
     },
 ]
 
+# ─────────────────────────────────────────────
+# FOLKETINGET — ODA API (lovforslag)
+# ─────────────────────────────────────────────
+# Officielt åbent JSON-API. typeid=14 = lovforslag.
+# Samlings-ID bygges dynamisk: 20251 = samling 2025/26 (1. samling)
+FT_ODA_URL = (
+    "https://oda.ft.dk/api/Sag"
+    "?$filter=typeid%20eq%2014"
+    "&$orderby=opdateringsdato%20desc"
+    "&$top=50"
+    "&$format=json"
+)
+FT_SAMLING = "20251"  # Opdatér ved ny samling
+
 # Fælles browser-headers til HTML-scraping
 SCRAPE_HEADERS = {
     "User-Agent": (
@@ -359,6 +373,83 @@ def fetch_hearings(seen):
             print(f"  ⚠️  Høringsportalen ({myndighed}): {type(e).__name__}: {e}")
 
     print(f"  → Høringsportalen total: {len(results)} nye høringer")
+    return results
+
+
+# ─────────────────────────────────────────────
+# FOLKETINGET — LOVFORSLAG VIA ODA API
+# ─────────────────────────────────────────────
+
+def fetch_lovforslag(seen):
+    """
+    Henter fremsatte lovforslag fra Folketingets ODA API (oda.ft.dk).
+    Filtrerer på LOOKBACK_DAYS og dedup mod seen.
+    Returnerer liste af dicts: titel, url, dato, navn, kilde_id, farve.
+    """
+    cutoff    = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    results   = []
+    seen_urls = set()
+
+    try:
+        r = requests.get(FT_ODA_URL, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
+        if r.status_code != 200:
+            print(f"  ⚠️  Folketinget ODA: HTTP {r.status_code}")
+            return results
+
+        data  = r.json()
+        items = data.get("value", [])
+        print(f"  → Folketinget ODA: {len(items)} lovforslag hentet")
+
+        for item in items:
+            titel      = (item.get("titel") or item.get("titelkort") or "").strip()
+            if not titel:
+                continue
+
+            # Byg URL til ft.dk
+            nummer     = item.get("nummer", "")
+            samling    = item.get("samling") or FT_SAMLING
+            if nummer:
+                url = f"https://www.ft.dk/samling/{samling}/lovforslag/{nummer}/index.htm"
+            else:
+                url = "https://www.ft.dk/da/dokumenter/dokumentlister/lovforslag"
+
+            if url in seen or url in seen_urls:
+                continue
+
+            # Dato
+            dato_str = item.get("opdateringsdato") or item.get("fremsatdato") or ""
+            dato     = None
+            if dato_str:
+                try:
+                    dato = datetime.fromisoformat(
+                        dato_str.replace("Z", "+00:00")
+                    ).replace(tzinfo=timezone.utc)
+                except ValueError:
+                    dato = _parse_danish_date(dato_str)
+
+            if dato and dato < cutoff:
+                continue
+
+            # Status til bemærkninger
+            status = item.get("status", "")
+
+            seen_urls.add(url)
+            results.append({
+                "kilde_id":    "ft",
+                "navn":        "Folketinget",
+                "titel":       titel,
+                "url":         url,
+                "dato":        dato,
+                "farve":       "#1A3A6B",
+                "kategori":    "Lovforslag",
+                "beskrivelse": "",
+                "bemærkninger": status if status else "ikke angivet",
+            })
+
+    except Exception as e:
+        print(f"  ⚠️  Folketinget ODA: {type(e).__name__}: {e}")
+
+    print(f"  → Folketinget ODA: {len(results)} nye lovforslag")
     return results
 
 
@@ -1047,8 +1138,11 @@ if __name__ == "__main__":
     print(f"▶ Henter høringer fra Høringsportalen ({len(HOERINGSPORTALEN_FEEDS)} feeds)...")
     hearings = fetch_hearings(seen)
 
-    # ── Hent nyheder fra de 4 nyhedskilder ──
-    # Nyhedssider sendes TOM seen — dedup sker via LOOKBACK_DAYS datofilteret
+    # ── Hent lovforslag fra Folketinget ──
+    print("▶ Henter lovforslag fra Folketinget ODA API...")
+    lovforslag = fetch_lovforslag(seen)
+
+    # ── Hent nyheder fra nyhedskilder (KEFM RSS) ──
     news_by_source = {}
     for source in NEWS_SOURCES:
         print(f"▶ Henter nyheder fra {source['navn']}...")
@@ -1056,19 +1150,34 @@ if __name__ == "__main__":
         if items:
             news_by_source[source["id"]] = items
 
+    # Tilføj lovforslag som egen kilde
+    if lovforslag:
+        news_by_source["ft"] = lovforslag
+
     # ── AI-klassificering: nyheder (kategori + beskrivelse + bemærkninger) ──
     if ANTHROPIC_API_KEY:
         alle_nyheder = [it for items in news_by_source.values() for it in items]
         print(f"▶ Klassificerer {len(alle_nyheder)} nyheder med Claude...")
         for it in alle_nyheder:
-            analyse = claude_klassificer(it["titel"], it["navn"], it["url"])
-            if analyse:
-                it["kategori"]     = analyse.get("kategori", "Øvrige myndighedsnyheder")
-                it["beskrivelse"]  = analyse.get("beskrivelse", "")
-                it["bemærkninger"] = analyse.get("bemærkninger", "ikke angivet")
-                print(f"  → [{it['kategori']}] {it['titel'][:50]}")
+            # Lovforslag har fast kategori — Claude beskriver kun
+            if it.get("kategori") == "Lovforslag":
+                analyse = claude_klassificer(it["titel"], it["navn"], it["url"])
+                if analyse:
+                    it["beskrivelse"]  = analyse.get("beskrivelse", "")
+                    # Bevar eksisterende bemærkninger (status) medmindre Claude har bedre
+                    claude_bem = analyse.get("bemærkninger", "")
+                    if claude_bem and claude_bem.lower() != "ikke angivet":
+                        it["bemærkninger"] = claude_bem
+                print(f"  → [Lovforslag] {it['titel'][:50]}")
             else:
-                it.setdefault("kategori", "Øvrige myndighedsnyheder")
+                analyse = claude_klassificer(it["titel"], it["navn"], it["url"])
+                if analyse:
+                    it["kategori"]     = analyse.get("kategori", "Øvrige myndighedsnyheder")
+                    it["beskrivelse"]  = analyse.get("beskrivelse", "")
+                    it["bemærkninger"] = analyse.get("bemærkninger", "ikke angivet")
+                    print(f"  → [{it['kategori']}] {it['titel'][:50]}")
+                else:
+                    it.setdefault("kategori", "Øvrige myndighedsnyheder")
             time.sleep(4)
 
         # ── AI-beskrivelse for høringer ──
