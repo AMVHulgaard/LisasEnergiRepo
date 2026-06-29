@@ -22,9 +22,9 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 # ─────────────────────────────────────────────
 # INDSTILLINGER
 # ─────────────────────────────────────────────
-LOOKBACK_DAYS = 7       # Kig 7 dage tilbage
-TIMEOUT       = 30      # Netværks-timeout i sekunder
-STATE_FILE    = "state.json"
+LOOKBACK_DAYS    = 7    # Kig 7 dage tilbage
+TIMEOUT          = 30   # Netværks-timeout i sekunder
+STATE_FILE       = "state.json"
 
 # ─────────────────────────────────────────────
 # HØRINGSPORTALEN — ATOM-FEEDS PR. MYNDIGHED
@@ -45,31 +45,38 @@ HOERINGSPORTALEN_BASE = (
 )
 
 # ─────────────────────────────────────────────
-# NYHEDSSIDER — HTML-SCRAPING
+# NYHEDSSIDER — HTML-SCRAPING OG RSS
 # ─────────────────────────────────────────────
+# type: "rss"  → hentes som RSS/ATOM-feed
+# type: "html" → scrapes som HTML
+# fsts bruger måneds-URL der bygges dynamisk i fetch_news_source
 NEWS_SOURCES = [
     {
         "id":    "ens",
         "navn":  "Energistyrelsen",
         "url":   "https://ens.dk/presse/nyheder-og-pressemeddelelser",
+        "type":  "html",
         "farve": "#1A5276",
     },
     {
         "id":    "fsts",
         "navn":  "Forsyningstilsynet",
-        "url":   "https://forsyningstilsynet.dk/nyheder",
+        "url":   "https://forsyningstilsynet.dk/nyheder/{year}/{month}",
+        "type":  "html_monthly",
         "farve": "#1A5276",
     },
     {
         "id":    "kefm",
         "navn":  "Klima-, Energi- og Forsyningsministeriet",
-        "url":   "https://www.kefm.dk/aktuelt/nyheder",
+        "url":   "https://www.kefm.dk/handlers/DynamicRss.ashx?id=76163fac-6c0a-4edb-8e6e-86a4dcf36bd4",
+        "type":  "rss",
         "farve": "#1A5276",
     },
     {
         "id":    "mst",
         "navn":  "Miljøstyrelsen",
-        "url":   "https://mst.dk/aktuelt/nyheder",
+        "url":   "https://mst.dk/nyheder",
+        "type":  "html",
         "farve": "#1A5276",
     },
 ]
@@ -289,8 +296,9 @@ def fetch_hearings(seen):
                 hoering_type = ""
                 frist        = "ikke angivet"
 
-                type_match  = re.search(r"Type:\s*([^\n|]+)", summary_clean)
-                frist_match = re.search(r"Høringsfrist:\s*(\d{2}-\d{2}-\d{4})", summary_clean)
+                # Summary-format: "Høringstype X · Myndighed Y · Høringsfrist DD-MM-YYYY · ..."
+                type_match  = re.search(r"Høringstype\s*([^·\n]+)", summary_clean)
+                frist_match = re.search(r"Høringsfrist\s*(\d{2}-\d{2}-\d{4})", summary_clean)
                 if type_match:
                     hoering_type = type_match.group(1).strip()
                 if frist_match:
@@ -421,14 +429,209 @@ def _find_articles(soup, base_url):
     return candidates
 
 
+def _normalise_url(href, base_url):
+    """Gør en relativ href til fuld URL."""
+    from urllib.parse import urlparse
+    if href.startswith("http"):
+        return href
+    if href.startswith("/"):
+        p = urlparse(base_url)
+        return f"{p.scheme}://{p.netloc}{href}"
+    return base_url.rstrip("/") + "/" + href
+
+
+def _html_items_to_news(items, source, seen, cutoff):
+    """Konverterer (titel, href, dato_text)-tupler til news-dicts."""
+    results = []
+    seen_urls = set()
+    for titel, href, dato_text in items:
+        full_url = _normalise_url(href, source["url"])
+        if full_url in seen or full_url in seen_urls:
+            continue
+        dato = _parse_danish_date(dato_text) if dato_text else None
+        if dato and dato < cutoff:
+            continue
+        seen_urls.add(full_url)
+        results.append({
+            "kilde_id": source["id"],
+            "navn":     source["navn"],
+            "titel":    titel,
+            "url":      full_url,
+            "dato":     dato,
+            "farve":    source["farve"],
+        })
+    return results
+
+
+def _fetch_rss_source(source, seen):
+    """
+    Henter nyheder fra et RSS/ATOM-feed.
+    Bruges til KEFM der har officielt RSS-feed.
+    """
+    from urllib.parse import urlparse
+    cutoff  = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    results = []
+    seen_urls = set()
+
+    try:
+        r = requests.get(source["url"], headers=SCRAPE_HEADERS, timeout=TIMEOUT)
+        if r.status_code != 200:
+            print(f"  ⚠️  {source['navn']} RSS: HTTP {r.status_code}")
+            return results
+
+        root = ET.fromstring(r.content)
+        # Prøv både RSS <item> og ATOM <entry>
+        ns_atom = {"atom": "http://www.w3.org/2005/Atom"}
+
+        # RSS 2.0
+        items_rss = root.findall(".//item")
+        # ATOM
+        items_atom = root.findall("atom:entry", ns_atom)
+        all_entries = items_rss or items_atom
+
+        base = urlparse(source["url"])
+        base_url = f"{base.scheme}://{base.netloc}"
+
+        for entry in all_entries:
+            # Titel
+            titel = (entry.findtext("title") or
+                     entry.findtext("atom:title", namespaces=ns_atom) or "").strip()
+            if not titel:
+                continue
+
+            # URL
+            link_el = entry.find("link")
+            if link_el is not None and link_el.text:
+                url = link_el.text.strip()
+            elif link_el is not None and link_el.get("href"):
+                url = link_el.get("href")
+            else:
+                url_el = entry.find("atom:link", ns_atom)
+                url = url_el.get("href", "") if url_el is not None else ""
+
+            if not url:
+                continue
+            if not url.startswith("http"):
+                url = base_url + url
+
+            # Dato
+            pub = (entry.findtext("pubDate") or
+                   entry.findtext("published") or
+                   entry.findtext("atom:published", namespaces=ns_atom) or
+                   entry.findtext("updated") or
+                   entry.findtext("atom:updated", namespaces=ns_atom) or "")
+            dato = None
+            if pub:
+                try:
+                    # RSS pubDate: "Mon, 23 Jun 2026 00:00:00 +0000"
+                    from email.utils import parsedate_to_datetime
+                    dato = parsedate_to_datetime(pub).replace(tzinfo=timezone.utc)
+                except Exception:
+                    dato = _parse_danish_date(pub)
+
+            if dato and dato < cutoff:
+                continue
+            if url in seen or url in seen_urls:
+                continue
+
+            seen_urls.add(url)
+            results.append({
+                "kilde_id": source["id"],
+                "navn":     source["navn"],
+                "titel":    titel,
+                "url":      url,
+                "dato":     dato,
+                "farve":    source["farve"],
+            })
+
+        print(f"  → {source['navn']} RSS: {len(results)} nye nyheder")
+    except Exception as e:
+        print(f"  ⚠️  {source['navn']} RSS: {type(e).__name__}: {e}")
+
+    return results
+
+
+def _fetch_html_monthly(source, seen):
+    """
+    Henter nyheder fra sites der organiserer artikler på månedssider
+    (fx forsyningstilsynet.dk/nyheder/YYYY/mmm).
+    Checker indeværende måned og forrige måned hvis LOOKBACK_DAYS > 28.
+    """
+    now    = datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=LOOKBACK_DAYS)
+
+    MAANED_KORT = {
+        1: "jan", 2: "feb", 3: "mar", 4: "apr",
+        5: "maj", 6: "jun", 7: "jul", 8: "aug",
+        9: "sep", 10: "okt", 11: "nov", 12: "dec",
+    }
+
+    # Byg liste af (år, måned) der skal hentes
+    months_to_check = [(now.year, now.month)]
+    # Tilføj forrige måned hvis cutoff er i den
+    prev = now.replace(day=1) - timedelta(days=1)
+    if prev >= cutoff:
+        months_to_check.append((prev.year, prev.month))
+
+    results = []
+    seen_urls = set()
+
+    for year, month in months_to_check:
+        url = source["url"].format(year=year, month=MAANED_KORT[month])
+        try:
+            r = requests.get(url, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
+            if r.status_code == 404:
+                print(f"  ℹ️  {source['navn']}: ingen artikler for {MAANED_KORT[month]} {year}")
+                continue
+            if r.status_code != 200:
+                print(f"  ⚠️  {source['navn']}: HTTP {r.status_code} for {url}")
+                continue
+
+            soup  = BeautifulSoup(r.text, "html.parser")
+            items = _find_articles(soup, url)
+            print(f"  → {source['navn']} ({MAANED_KORT[month]} {year}): {len(items)} artikler")
+
+            for titel, href, dato_text in items:
+                full_url = _normalise_url(href, url)
+                if full_url in seen or full_url in seen_urls:
+                    continue
+                dato = _parse_danish_date(dato_text) if dato_text else None
+                if dato and dato < cutoff:
+                    continue
+                seen_urls.add(full_url)
+                results.append({
+                    "kilde_id": source["id"],
+                    "navn":     source["navn"],
+                    "titel":    titel,
+                    "url":      full_url,
+                    "dato":     dato,
+                    "farve":    source["farve"],
+                })
+        except Exception as e:
+            print(f"  ⚠️  {source['navn']} ({MAANED_KORT[month]}): {type(e).__name__}: {e}")
+
+    print(f"  → {source['navn']}: {len(results)} nye nyheder efter dedup")
+    return results
+
+
 def fetch_news_source(source, seen):
     """
-    Scraper én nyhedskilde og returnerer liste af nye nyheder.
-    Hvert element: { id, navn, titel, url, dato, farve }
+    Router til den rigtige hente-metode baseret på source["type"]:
+      "rss"         → RSS/ATOM-feed
+      "html_monthly"→ HTML-scraping af månedssider
+      "html"        → HTML-scraping af listeside (generisk)
     """
-    cutoff = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
-    results = []
+    source_type = source.get("type", "html")
 
+    if source_type == "rss":
+        return _fetch_rss_source(source, seen)
+
+    if source_type == "html_monthly":
+        return _fetch_html_monthly(source, seen)
+
+    # Standard HTML-scraping
+    cutoff  = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    results = []
     try:
         r = requests.get(source["url"], headers=SCRAPE_HEADERS, timeout=TIMEOUT)
         if r.status_code != 200:
@@ -438,37 +641,7 @@ def fetch_news_source(source, seen):
         soup  = BeautifulSoup(r.text, "html.parser")
         items = _find_articles(soup, source["url"])
         print(f"  → {source['navn']}: {len(items)} artikler fundet på siden")
-
-        seen_urls = set()
-        for titel, href, dato_text in items:
-            # Normalisér URL
-            if href.startswith("http"):
-                full_url = href
-            elif href.startswith("/"):
-                from urllib.parse import urlparse
-                parsed = urlparse(source["url"])
-                full_url = f"{parsed.scheme}://{parsed.netloc}{href}"
-            else:
-                full_url = source["url"].rstrip("/") + "/" + href
-
-            if full_url in seen or full_url in seen_urls:
-                continue
-
-            # Forsøg datoparse — spring over hvis ældre end cutoff
-            dato = _parse_danish_date(dato_text) if dato_text else None
-            if dato and dato < cutoff:
-                continue
-
-            seen_urls.add(full_url)
-            results.append({
-                "kilde_id": source["id"],
-                "navn":     source["navn"],
-                "titel":    titel,
-                "url":      full_url,
-                "dato":     dato,
-                "farve":    source["farve"],
-            })
-
+        results = _html_items_to_news(items, source, seen, cutoff)
     except Exception as e:
         print(f"  ⚠️  {source['navn']}: {type(e).__name__}: {e}")
 
@@ -752,16 +925,15 @@ if __name__ == "__main__":
         if items:
             news_by_source[source["id"]] = items
 
-    # ── AI-beskrivelser (valgfrit) ──
+    # ── AI-beskrivelser (alle nyheder — ingen loft) ──
     if ANTHROPIC_API_KEY:
-        total_items = sum(len(v) for v in news_by_source.values())
-        print(f"▶ Genererer Claude-beskrivelser for {total_items} nyheder...")
-        for source_id, items in news_by_source.items():
-            for it in items:
-                beskrivelse = claude_beskriv(it["titel"], it["navn"], it["url"])
-                if beskrivelse:
-                    it["beskrivelse"] = beskrivelse
-                time.sleep(0.3)
+        alle_nyheder = [it for items in news_by_source.values() for it in items]
+        print(f"▶ Genererer Claude-beskrivelser for {len(alle_nyheder)} nyheder...")
+        for it in alle_nyheder:
+            beskrivelse = claude_beskriv(it["titel"], it["navn"], it["url"])
+            if beskrivelse:
+                it["beskrivelse"] = beskrivelse
+            time.sleep(0.5)  # Undgå rate limiting
 
     # ── Opdatér state ──
     new_urls = set()
