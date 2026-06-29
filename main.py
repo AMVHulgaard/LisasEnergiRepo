@@ -97,11 +97,15 @@ SCRAPE_HEADERS = {
 # ─────────────────────────────────────────────
 
 def load_state():
-    """Returnerer set af allerede sete URL'er."""
+    """
+    Returnerer set af høring-URLs vi allerede har vist.
+    Nyhedssider dedupes udelukkende via datofilteret (LOOKBACK_DAYS).
+    Høringer har intet datofilter der forhindrer gentagelse, så de huskes.
+    """
     try:
         with open(STATE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-            return set(data.get("seen", []))
+            return set(data.get("horinger_sete", []))
     except FileNotFoundError:
         print("  ℹ️  state.json ikke fundet — første kørsel")
         return set()
@@ -110,18 +114,29 @@ def load_state():
         return set()
 
 
-def save_state(seen_set):
-    """Gemmer state til state.json. Committes automatisk af weekly.yml."""
+def save_state(horinger_sete):
+    """
+    Gemmer kun høring-URLs til state.json.
+    Rydder automatisk op: fjerner høringer ældre end 60 dage
+    (baseret på URL-mønsteret eller blot at vi beholder en rullende liste
+    på maks 500 poster så filen ikke vokser ubegrænset).
+    """
+    # Behold maks 500 seneste poster (FIFO)
+    sorteret = sorted(horinger_sete)
+    if len(sorteret) > 500:
+        sorteret = sorteret[-500:]
+
     try:
         with open(STATE_FILE, "w", encoding="utf-8") as f:
             json.dump(
                 {
-                    "seen":         sorted(seen_set),
-                    "last_updated": datetime.now(timezone.utc).isoformat(),
+                    "horinger_sete": sorteret,
+                    "last_updated":  datetime.now(timezone.utc).isoformat(),
+                    "_note": "Kun høring-URLs gemmes. Nyhedssider dedupes via LOOKBACK_DAYS.",
                 },
                 f, indent=2, ensure_ascii=False,
             )
-        print(f"  ✅ state.json gemt ({len(seen_set)} sete)")
+        print(f"  ✅ state.json gemt ({len(sorteret)} høringer husket)")
     except Exception as e:
         print(f"  ⚠️  Kunne ikke gemme state.json: {e}")
 
@@ -494,6 +509,8 @@ _NAV_TITLER = {
     "privatlivs- og cookiepolitik", "miljøministeriet", "kystdirektoratet",
     "retningslinjer for brug af sociale medier",
     "retningslinjer for aktiv informationspligt",
+    "om miljøstyrelsen", "om energistyrelsen", "om forsyningstilsynet",
+    "om naturstyrelsen", "om ministeriet", "om kefm",
 }
 
 
@@ -501,6 +518,9 @@ def _er_nav_link(titel, url):
     """Returnerer True hvis linket ser ud til at være navigation/footer."""
     titel_lower = titel.strip().lower()
     if titel_lower in _NAV_TITLER:
+        return True
+    # "Om X" er næsten altid en om-siden, ikke en nyhed
+    if titel_lower.startswith("om ") and len(titel_lower) < 40:
         return True
     # Tjek URL-segmenter
     from urllib.parse import urlparse
@@ -783,7 +803,10 @@ def _item_html(item, farve):
     # Bemærkninger: brug frist fra høring hvis tilgængeligt
     bem_tekst = bemærkninger or (f"Høringsfrist: {frist}" if frist and frist != "ikke angivet" else "")
     if not bem_tekst:
-        bem_tekst = "Bemærkninger: ikke angivet"
+        bem_tekst = "ikke angivet"
+    # Fjern "Bemærkninger:"-præfiks hvis Claude allerede har sat det
+    if bem_tekst.lower().startswith("bemærkninger:"):
+        bem_tekst = bem_tekst[len("bemærkninger:"):].strip()
     bem_html = (
         f'<p style="margin:5px 0 0 0;font-size:12px;color:#555;">' +
         f'<strong>Bemærkninger:</strong> {bem_tekst}</p>'
@@ -1036,10 +1059,11 @@ if __name__ == "__main__":
     hearings = fetch_hearings(seen)
 
     # ── Hent nyheder fra de 4 nyhedskilder ──
+    # Nyhedssider sendes TOM seen — dedup sker via LOOKBACK_DAYS datofilteret
     news_by_source = {}
     for source in NEWS_SOURCES:
         print(f"▶ Henter nyheder fra {source['navn']}...")
-        items = fetch_news_source(source, seen)
+        items = fetch_news_source(source, set())
         if items:
             news_by_source[source["id"]] = items
 
@@ -1063,15 +1087,9 @@ if __name__ == "__main__":
             for it in items:
                 it.setdefault("kategori", "Øvrige myndighedsnyheder")
 
-    # ── Opdatér state ──
-    new_urls = set()
-    for items in news_by_source.values():
-        for it in items:
-            new_urls.add(it["url"])
-    for it in hearings:
-        new_urls.add(it["url"])
-
-    save_state(seen | new_urls)
+    # ── Opdatér state — kun høringer ──
+    nye_hoering_urls = {it["url"] for it in hearings}
+    save_state(seen | nye_hoering_urls)
 
     # ── Byg HTML ──
     print("▶ Bygger HTML-mail...")
