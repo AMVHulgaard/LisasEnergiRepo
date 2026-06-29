@@ -12,8 +12,9 @@
     "https://hoeringsportalen.dk/Hearing/Details/71258",
     "https://hoeringsportalen.dk/Hearing/Details/71264",
     "https://hoeringsportalen.dk/Hearing/Details/71265",
-    "https://hoeringsportalen.dk/Hearing/Details/71268"
+    "https://hoeringsportalen.dk/Hearing/Details/71268",
+    "https://hoeringsportalen.dk/Hearing/Details/71275"
   ],
-  "last_updated": "2026-06-29T09:19:34.738947+00:00",
+  "last_updated": "2026-06-29T10:50:41.839350+00:00",
   "_note": "Kun høring-URLs gemmes. Nyhedssider dedupes via LOOKBACK_DAYS."
 }
