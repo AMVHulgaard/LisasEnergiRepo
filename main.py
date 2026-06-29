@@ -30,14 +30,23 @@ STATE_FILE       = "state.json"
 # HØRINGSPORTALEN — ATOM-FEEDS PR. MYNDIGHED
 # ─────────────────────────────────────────────
 # Authority-IDs fra hoeringsportalen.dk/Syndication
+# Alle relevante myndigheder fra Lisas liste med kendte Høringsportal-IDs.
+# Ministeriet for Grøn Trepart og Miljø- og Ligestillingsministeriet er nye
+# (oprettet juni 2026) og har endnu ikke feeds på Høringsportalen.
 HOERINGSPORTALEN_FEEDS = [
-    ("Energistyrelsen",                           655),
-    ("Forsyningstilsynet",                        665),
-    ("Klima-, Energi- og Forsyningsministeriet", 1742),
-    ("Miljøstyrelsen",                            634),
-    ("Ministeriet for Samfundssikkerhed og Beredskab", 1779),
-    ("Naturstyrelsen",                            702),
-    ("Styrelsen for Grøn Arealomlægning og Vandmiljø", 1744),
+    # Styrelser
+    ("Energistyrelsen",                                    655),
+    ("Forsyningstilsynet",                                 665),
+    ("Miljøstyrelsen",                                     634),
+    ("Naturstyrelsen",                                     702),
+    ("Styrelsen for Grøn Arealomlægning og Vandmiljø",   1744),
+    ("Beredskabsstyrelsen",                                626),
+    # Ministerier
+    ("Klima-, Energi- og Forsyningsministeriet",          1742),
+    ("Ministeriet for Samfundssikkerhed og Beredskab",   1779),
+    ("Erhvervsministeriet",                                619),
+    ("Forsvarsministeriet",                                605),
+    ("Miljøministeriet",                                   610),
 ]
 
 HOERINGSPORTALEN_BASE = (
@@ -45,38 +54,16 @@ HOERINGSPORTALEN_BASE = (
 )
 
 # ─────────────────────────────────────────────
-# NYHEDSSIDER — HTML-SCRAPING OG RSS
+# NYHEDSKILDER — KUN RSS
 # ─────────────────────────────────────────────
-# type: "rss"  → hentes som RSS/ATOM-feed
-# type: "html" → scrapes som HTML
-# fsts bruger måneds-URL der bygges dynamisk i fetch_news_source
+# ENS, FSTS og MST bruger JS-rendering og dækkes i stedet via Høringsportalen.
+# KEFM har et officielt RSS-feed der virker pålideligt.
 NEWS_SOURCES = [
-    {
-        "id":    "ens",
-        "navn":  "Energistyrelsen",
-        "url":   "https://ens.dk/presse/nyheder-og-pressemeddelelser",
-        "type":  "html",
-        "farve": "#1A5276",
-    },
-    {
-        "id":    "fsts",
-        "navn":  "Forsyningstilsynet",
-        "url":   "https://forsyningstilsynet.dk/nyheder/{year}/{month}",
-        "type":  "html_monthly",
-        "farve": "#1A5276",
-    },
     {
         "id":    "kefm",
         "navn":  "Klima-, Energi- og Forsyningsministeriet",
         "url":   "https://www.kefm.dk/handlers/DynamicRss.ashx?id=76163fac-6c0a-4edb-8e6e-86a4dcf36bd4",
         "type":  "rss",
-        "farve": "#1A5276",
-    },
-    {
-        "id":    "mst",
-        "navn":  "Miljøstyrelsen",
-        "url":   "https://mst.dk/nyheder",
-        "type":  "html",
         "farve": "#1A5276",
     },
 ]
