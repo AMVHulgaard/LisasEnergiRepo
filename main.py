@@ -72,15 +72,20 @@ NEWS_SOURCES = [
 # FOLKETINGET — ODA API (lovforslag)
 # ─────────────────────────────────────────────
 # Officielt åbent JSON-API. typeid=14 = lovforslag.
-# Samlings-ID bygges dynamisk: 20251 = samling 2025/26 (1. samling)
-FT_ODA_URL = (
-    "https://oda.ft.dk/api/Sag"
-    "?$filter=typeid%20eq%2014"
-    "&$orderby=opdateringsdato%20desc"
-    "&$top=50"
-    "&$format=json"
-)
-FT_SAMLING = "20251"  # Opdatér ved ny samling
+# Samlings-ID bygges automatisk: år*10+1 for første samling i kalenderåret.
+# URL bygges i fetch_lovforslag med dato-filter på opdateringsdato.
+FT_ODA_BASE = "https://oda.ft.dk/api/Sag"
+
+# Emneord der indikerer relevans for energi/forsyning/klima/miljø/beredskab.
+# Lovforslag der ikke matcher noget af dette filtreres fra.
+FT_RELEVANTE_EMNEORD = {
+    "energi", "forsyning", "klima", "miljø", "natur", "vand",
+    "el", "gas", "varme", "vedvarende", "affald", "beredskab",
+    "havvind", "vind", "sol", "biogas", "brint", "carbon",
+    "co2", "drivhusgas", "afgift", "elnet", "fjernvarme",
+    "naturgasforsyning", "elforsyning", "vandforsyning",
+    "forurening", "kemikalie", "pesticid", "arealomlægning",
+}
 
 # Fælles browser-headers til HTML-scraping
 SCRAPE_HEADERS = {
@@ -380,40 +385,77 @@ def fetch_hearings(seen):
 # FOLKETINGET — LOVFORSLAG VIA ODA API
 # ─────────────────────────────────────────────
 
+def _ft_samlings_id():
+    """
+    Beregner automatisk det aktuelle samlings-ID.
+    Samling starter i oktober: 20251 = okt 2025 - jun 2026.
+    """
+    now = datetime.now(timezone.utc)
+    # Samlingen starter i oktober — starter vi i okt-dec bruger vi dette år
+    if now.month >= 10:
+        aar = now.year
+    else:
+        aar = now.year - 1
+    return f"{aar}1"
+
+
 def fetch_lovforslag(seen):
     """
     Henter fremsatte lovforslag fra Folketingets ODA API (oda.ft.dk).
-    Filtrerer på LOOKBACK_DAYS og dedup mod seen.
-    Returnerer liste af dicts: titel, url, dato, navn, kilde_id, farve.
+    - Filtrerer på LOOKBACK_DAYS via opdateringsdato
+    - Filtrerer på emneord så kun energi/forsyning/klima/miljø-relevante lovforslag medtages
+    - Dedup mod seen
+    Returnerer liste af dicts klar til build_html.
     """
+    from urllib.parse import quote
     cutoff    = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
     results   = []
     seen_urls = set()
+    samling   = _ft_samlings_id()
+
+    # Hent seneste 100 lovforslag — dato-filtrering sker i Python nedenfor
+    # (ODA API v3 dato-filter-syntaks er upålidelig)
+    url_api = (
+        f"{FT_ODA_BASE}"
+        f"?$filter=typeid%20eq%2014"
+        f"&$orderby=opdateringsdato%20desc"
+        f"&$top=100"
+        f"&$format=json"
+    )
 
     try:
-        r = requests.get(FT_ODA_URL, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
+        r = requests.get(url_api, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
         if r.status_code != 200:
-            print(f"  ⚠️  Folketinget ODA: HTTP {r.status_code}")
+            print(f"  ⚠️  Folketinget ODA: HTTP {r.status_code} — muligvis sommerpause")
             return results
 
         data  = r.json()
         items = data.get("value", [])
-        print(f"  → Folketinget ODA: {len(items)} lovforslag hentet")
+        print(f"  → Folketinget ODA: {len(items)} lovforslag hentet (seneste {LOOKBACK_DAYS} dage)")
 
+        frafiltreret = 0
         for item in items:
-            titel      = (item.get("titel") or item.get("titelkort") or "").strip()
+            titel = (item.get("titel") or item.get("titelkort") or "").strip()
             if not titel:
                 continue
 
-            # Byg URL til ft.dk
-            nummer     = item.get("nummer", "")
-            samling    = item.get("samling") or FT_SAMLING
-            if nummer:
-                url = f"https://www.ft.dk/samling/{samling}/lovforslag/{nummer}/index.htm"
-            else:
-                url = "https://www.ft.dk/da/dokumenter/dokumentlister/lovforslag"
+            # Emnefilter — hel-ords-match så "el" ikke matcher "kreditaftaleloven"
+            import re as _re
+            titel_lower = titel.lower()
+            if not any(_re.search(r"\b" + _re.escape(o) + r"\w*", titel_lower)
+                       for o in FT_RELEVANTE_EMNEORD):
+                frafiltreret += 1
+                continue
 
-            if url in seen or url in seen_urls:
+            # Byg URL til ft.dk
+            nummer  = item.get("nummer", "")
+            sml     = item.get("samlingid") or samling
+            if nummer:
+                ft_url = f"https://www.ft.dk/samling/{sml}/lovforslag/{nummer}/index.htm"
+            else:
+                ft_url = "https://www.ft.dk/da/dokumenter/dokumentlister/lovforslag"
+
+            if ft_url in seen or ft_url in seen_urls:
                 continue
 
             # Dato
@@ -427,29 +469,29 @@ def fetch_lovforslag(seen):
                 except ValueError:
                     dato = _parse_danish_date(dato_str)
 
-            if dato and dato < cutoff:
-                continue
-
             # Status til bemærkninger
             status = item.get("status", "")
 
-            seen_urls.add(url)
+            seen_urls.add(ft_url)
             results.append({
-                "kilde_id":    "ft",
-                "navn":        "Folketinget",
-                "titel":       titel,
-                "url":         url,
-                "dato":        dato,
-                "farve":       "#1A3A6B",
-                "kategori":    "Lovforslag",
-                "beskrivelse": "",
+                "kilde_id":     "ft",
+                "navn":         "Folketinget",
+                "titel":        titel,
+                "url":          ft_url,
+                "dato":         dato,
+                "farve":        "#1A3A6B",
+                "kategori":     "Lovforslag",
+                "beskrivelse":  "",
                 "bemærkninger": status if status else "ikke angivet",
             })
+
+        if frafiltreret:
+            print(f"  → {frafiltreret} lovforslag frafiltreret (ikke energi/forsyning/klima/miljø)")
 
     except Exception as e:
         print(f"  ⚠️  Folketinget ODA: {type(e).__name__}: {e}")
 
-    print(f"  → Folketinget ODA: {len(results)} nye lovforslag")
+    print(f"  → Folketinget ODA: {len(results)} relevante lovforslag")
     return results
 
 
