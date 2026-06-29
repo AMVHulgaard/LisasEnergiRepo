@@ -385,18 +385,35 @@ def fetch_hearings(seen):
 # FOLKETINGET — LOVFORSLAG VIA ODA API
 # ─────────────────────────────────────────────
 
-def _ft_samlings_id():
+def _ft_aktuel_samling():
     """
-    Beregner automatisk det aktuelle samlings-ID.
-    Samling starter i oktober: 20251 = okt 2025 - jun 2026.
+    Henter det aktuelle samlings-ID direkte fra Folketingets ODA API.
+    Mere robust end at beregne det, da der kan være ekstraordinære samlinger
+    (fx 20252 ved regeringsskifte midt i et år).
+    Fallback: beregn ud fra måned hvis API ikke svarer.
     """
+    try:
+        r = requests.get(
+            "https://oda.ft.dk/api/Samling?$orderby=id%20desc&$top=1&$format=json",
+            headers=SCRAPE_HEADERS,
+            timeout=TIMEOUT,
+        )
+        if r.status_code == 200:
+            data = r.json()
+            if data.get("value"):
+                samling_id = str(data["value"][0].get("id", ""))
+                if samling_id:
+                    print(f"  → Aktuel Ft-samling: {samling_id}")
+                    return samling_id
+    except Exception as e:
+        print(f"  ⚠️  Kunne ikke hente samlings-ID fra ODA: {e}")
+
+    # Fallback: beregn ud fra måned
     now = datetime.now(timezone.utc)
-    # Samlingen starter i oktober — starter vi i okt-dec bruger vi dette år
-    if now.month >= 10:
-        aar = now.year
-    else:
-        aar = now.year - 1
-    return f"{aar}1"
+    aar = now.year if now.month >= 10 else now.year - 1
+    fallback = f"{aar}1"
+    print(f"  ⚠️  Bruger beregnet samlings-ID som fallback: {fallback}")
+    return fallback
 
 
 def fetch_lovforslag(seen):
@@ -411,7 +428,7 @@ def fetch_lovforslag(seen):
     cutoff    = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
     results   = []
     seen_urls = set()
-    samling   = _ft_samlings_id()
+    samling   = _ft_aktuel_samling()
 
     # Hent seneste 100 lovforslag — dato-filtrering sker i Python nedenfor
     # (ODA API v3 dato-filter-syntaks er upålidelig)
