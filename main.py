@@ -71,7 +71,7 @@ NEWS_SOURCES = [
 # ─────────────────────────────────────────────
 # FOLKETINGET — ODA API (lovforslag)
 # ─────────────────────────────────────────────
-# Officielt åbent JSON-API. typeid=14 = lovforslag.
+# Officielt åbent JSON-API. typeid=3 = lovforslag (bekræftet fra API).
 # Samlings-ID bygges automatisk: år*10+1 for første samling i kalenderåret.
 # URL bygges i fetch_lovforslag med dato-filter på opdateringsdato.
 FT_ODA_BASE = "https://oda.ft.dk/api/Sag"
@@ -411,9 +411,11 @@ def fetch_lovforslag(seen):
 
     # Hent seneste 100 lovforslag — dato-filtrering sker i Python nedenfor
     # (ODA API v3 dato-filter-syntaks er upålidelig)
+    # typeid=3 = lovforslag, sorteret efter opdateringsdato
+    # Dato-filtrering sker i Python nedenfor (OData dato-filter er upålidelig)
     url_api = (
         f"{FT_ODA_BASE}"
-        f"?$filter=typeid%20eq%2014"
+        f"?$filter=typeid%20eq%203"
         f"&$orderby=opdateringsdato%20desc"
         f"&$top=100"
         f"&$format=json"
