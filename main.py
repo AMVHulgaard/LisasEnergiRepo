@@ -84,13 +84,18 @@ FT_SAMLING = _os.environ.get("FT_SAMLING", "20252").strip() or "20252"
 
 # Emneord der indikerer relevans for energi/forsyning/klima/miljø/beredskab.
 # Lovforslag der ikke matcher noget af dette filtreres fra.
-FT_RELEVANTE_EMNEORD = {
-    "energi", "forsyning", "klima", "miljø", "natur", "vand",
-    "el", "gas", "varme", "vedvarende", "affald", "beredskab",
-    "havvind", "vind", "sol", "biogas", "brint", "carbon",
-    "co2", "drivhusgas", "afgift", "elnet", "fjernvarme",
-    "naturgasforsyning", "elforsyning", "vandforsyning",
-    "forurening", "kemikalie", "pesticid", "arealomlægning",
+# Bredt forfilter — fjerner åbenlyst irrelevante lovforslag inden Claude-kald.
+# Claude vurderer herefter om de resterende er relevante for energi/forsyning/klima/miljø.
+FT_UDELUK_EMNEORD = {
+    "udlændinge", "straffeloven", "folkeskolen", "gymnasie",
+    "erhvervsuddannelse", "dagpenge", "sygedagpenge", "barsel",
+    "pension", "folkepension", "boligstøtte", "kontanthjælp",
+    "aktieselskab", "selskabsskat", "moms", "tinglysning",
+    "domstol", "retspleje", "politi", "fængsel", "kriminal",
+    "sundhedsloven", "sygehus", "læge", "medicin", "apotek",
+    "daginstitution", "børnepasning", "folkehøjskole",
+    "solarier", "tatovering", "tobak", "alkohol",
+    "spil", "lotteri", "dyrevelfærd",
 }
 
 # Fælles browser-headers til HTML-scraping
@@ -240,14 +245,20 @@ Kilde: {kilde}
 Titel: {titel}
 URL: {url}
 
+Advokatfirmaet specialiserer sig i: energiret, forsyningsret, elforsyning, gasforsyning,
+fjernvarme, vedvarende energi, klimaregulering, miljøret, forsyningssikkerhed og beredskab.
+
 Svar KUN med et JSON-objekt i præcis dette format (ingen præambel, ingen kodeblok):
 {{
+  "relevant": true,
   "kategori": "<én af: Lovforslag | Bekendtgørelser | Vejledninger og praksis | Politiske aftaler, strategier og udspil | Høringer | Øvrige myndighedsnyheder>",
-  "beskrivelse": "<2-4 linjer, neutral og deskriptiv beskrivelse af hovedindhold og formål. Ingen vurdering eller fortolkning.>",
-  "bemærkninger": "<høringsfrist, ikrafttrædelsesdato, status i lovgivningsprocessen eller overgangsordninger — kun hvis det fremgår eksplicit af titlen. Ellers: ikke angivet>"
+  "beskrivelse": "<2-4 linjer, neutral og deskriptiv beskrivelse af hovedindhold og formål. Ingen vurdering eller fortolkning. Tom streng hvis ikke relevant.>",
+  "bemærkninger": "<høringsfrist, ikrafttrædelsesdato, status i lovgivningsprocessen — kun hvis det fremgår eksplicit af titlen. Ellers: ikke angivet>"
 }}
 
 Regler:
+- Sæt "relevant": false hvis indholdet IKKE vedrører energi, forsyning, klima, miljø eller beredskab
+- Sæt "relevant": true hvis indholdet vedrører disse områder — selv indirekte (fx afgifter på energi, infrastruktur til elbiler, vandforsyning, naturbeskyttelse)
 - Vælg Lovforslag hvis titlen indikerer et lovforslag fremsat for Folketinget
 - Vælg Bekendtgørelser hvis titlen indikerer en bekendtgørelse eller ændring heraf
 - Vælg Vejledninger og praksis hvis titlen indikerer en vejledning, retningslinje eller praksis
@@ -438,13 +449,13 @@ def fetch_lovforslag(seen):
             if not titel:
                 continue
 
-            # Emnefilter — hel-ords-match så "el" ikke matcher "kreditaftaleloven"
             import re as _re
             titel_lower = titel.lower()
-            if not any(_re.search(r"\b" + _re.escape(o) + r"\w*", titel_lower)
-                       for o in FT_RELEVANTE_EMNEORD):
+            if any(_re.search(r"\b" + _re.escape(o) + r"\w*", titel_lower)
+                   for o in FT_UDELUK_EMNEORD):
                 frafiltreret += 1
                 continue
+
 
             # Byg URL til ft.dk
             nummer  = item.get("nummer", "")
@@ -485,7 +496,7 @@ def fetch_lovforslag(seen):
             })
 
         if frafiltreret:
-            print(f"  → {frafiltreret} lovforslag frafiltreret (ikke energi/forsyning/klima/miljø)")
+            print(f"  → {frafiltreret} lovforslag forfilteret (åbenlyst irrelevante) — Claude vurderer resten")
 
     except Exception as e:
         print(f"  ⚠️  Folketinget ODA: {type(e).__name__}: {e}")
@@ -1199,27 +1210,28 @@ if __name__ == "__main__":
     if ANTHROPIC_API_KEY:
         alle_nyheder = [it for items in news_by_source.values() for it in items]
         print(f"▶ Klassificerer {len(alle_nyheder)} nyheder med Claude...")
-        for it in alle_nyheder:
-            # Lovforslag har fast kategori — Claude beskriver kun
-            if it.get("kategori") == "Lovforslag":
-                analyse = claude_klassificer(it["titel"], it["navn"], it["url"])
-                if analyse:
-                    it["beskrivelse"]  = analyse.get("beskrivelse", "")
-                    # Bevar eksisterende bemærkninger (status) medmindre Claude har bedre
-                    claude_bem = analyse.get("bemærkninger", "")
-                    if claude_bem and claude_bem.lower() != "ikke angivet":
-                        it["bemærkninger"] = claude_bem
-                print(f"  → [Lovforslag] {it['titel'][:50]}")
+        kasserede = 0
+        for it in list(alle_nyheder):
+            analyse = claude_klassificer(it["titel"], it["navn"], it["url"])
+            if analyse:
+                if not analyse.get("relevant", True):
+                    kasserede += 1
+                    for kilde_items in news_by_source.values():
+                        if it in kilde_items:
+                            kilde_items.remove(it)
+                    time.sleep(8)
+                    continue
+                it["kategori"]    = analyse.get("kategori", "Øvrige myndighedsnyheder")
+                it["beskrivelse"] = analyse.get("beskrivelse", "")
+                claude_bem        = analyse.get("bemærkninger", "")
+                if not (it.get("bemærkninger") and it["bemærkninger"] != "ikke angivet"):
+                    it["bemærkninger"] = claude_bem if (claude_bem and claude_bem.lower() != "ikke angivet") else "ikke angivet"
+                print(f"  → [{it['kategori']}] {it['titel'][:50]}")
             else:
-                analyse = claude_klassificer(it["titel"], it["navn"], it["url"])
-                if analyse:
-                    it["kategori"]     = analyse.get("kategori", "Øvrige myndighedsnyheder")
-                    it["beskrivelse"]  = analyse.get("beskrivelse", "")
-                    it["bemærkninger"] = analyse.get("bemærkninger", "ikke angivet")
-                    print(f"  → [{it['kategori']}] {it['titel'][:50]}")
-                else:
-                    it.setdefault("kategori", "Øvrige myndighedsnyheder")
-            time.sleep(4)
+                it.setdefault("kategori", "Øvrige myndighedsnyheder")
+            time.sleep(8)
+        if kasserede:
+            print(f"  → {kasserede} kasseret af Claude (ikke relevant for energi/forsyning/klima/miljø)")
 
         # ── AI-beskrivelse for høringer ──
         print(f"▶ Genererer beskrivelser for {len(hearings)} høringer med Claude...")
@@ -1235,7 +1247,7 @@ if __name__ == "__main__":
                     it["bemærkninger"] = claude_bem
                 else:
                     it["bemærkninger"] = "ikke angivet"
-            time.sleep(4)
+            time.sleep(8)
     else:
         # Uden AI: sæt alle nyheder i øvrige
         for items in news_by_source.values():
