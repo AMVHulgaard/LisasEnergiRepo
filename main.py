@@ -170,13 +170,36 @@ def send_mail(access_token, subject, html_body):
 
 
 # ─────────────────────────────────────────────
-# CLAUDE — BESKRIVELSE AF NYHED
+# CLAUDE — KLASSIFICERING OG BESKRIVELSE
 # ─────────────────────────────────────────────
 
-def claude_beskriv(titel, kilde, url):
+# De 6 outputkategorier Lisa ønsker
+KATEGORIER = [
+    "Lovforslag",
+    "Bekendtgørelser",
+    "Vejledninger og praksis",
+    "Politiske aftaler, strategier og udspil",
+    "Høringer",
+    "Øvrige myndighedsnyheder",
+]
+
+# Farver pr. kategori (Outlook-kompatible)
+KATEGORI_FARVER = {
+    "Lovforslag":                              "#1A3A6B",
+    "Bekendtgørelser":                         "#1A5276",
+    "Vejledninger og praksis":                 "#1F618D",
+    "Politiske aftaler, strategier og udspil": "#117A65",
+    "Høringer":                                "#145A32",
+    "Øvrige myndighedsnyheder":                "#4A235A",
+}
+
+
+def claude_klassificer(titel, kilde, url):
     """
-    Beder Claude skrive en neutral 2-3 linjers beskrivelse af nyheden
-    baseret på titel og kilde. Returnerer beskrivelsestekst eller None.
+    Klassificerer nyheden i én af de 6 kategorier og genererer:
+      - beskrivelse (2-4 linjer, neutral og deskriptiv)
+      - bemærkninger (frist, ikrafttrædelse, status — eller "ikke angivet")
+    Returnerer dict eller None ved fejl.
     """
     if not ANTHROPIC_API_KEY:
         return None
@@ -184,18 +207,31 @@ def claude_beskriv(titel, kilde, url):
     prompt = f"""Du er juridisk assistent for et dansk advokatfirma specialiseret i
 energi- og forsyningsret, miljøret og regulatorisk ret.
 
-Skriv en kort, neutral og præcis beskrivelse (2-3 sætninger) af følgende nyhed
-fra en dansk myndighed. Beskriv kun hvad titlen angiver — ingen fortolkning.
-Sproget er sagligt og egnet til professionel brug.
+Klassificér følgende nyhed fra en dansk myndighed og generér output til et ugentligt nyhedsoverblik.
 
 Kilde: {kilde}
 Titel: {titel}
 URL: {url}
 
-Svar KUN med beskrivelsesteksten — ingen overskrift, ingen JSON, ingen præambel."""
+Svar KUN med et JSON-objekt i præcis dette format (ingen præambel, ingen kodeblok):
+{{
+  "kategori": "<én af: Lovforslag | Bekendtgørelser | Vejledninger og praksis | Politiske aftaler, strategier og udspil | Høringer | Øvrige myndighedsnyheder>",
+  "beskrivelse": "<2-4 linjer, neutral og deskriptiv beskrivelse af hovedindhold og formål. Ingen vurdering eller fortolkning.>",
+  "bemærkninger": "<høringsfrist, ikrafttrædelsesdato, status i lovgivningsprocessen eller overgangsordninger — kun hvis det fremgår eksplicit af titlen. Ellers: ikke angivet>"
+}}
 
-    try:
-        r = requests.post(
+Regler:
+- Vælg Lovforslag hvis titlen indikerer et lovforslag fremsat for Folketinget
+- Vælg Bekendtgørelser hvis titlen indikerer en bekendtgørelse eller ændring heraf
+- Vælg Vejledninger og praksis hvis titlen indikerer en vejledning, retningslinje eller praksis
+- Vælg Politiske aftaler, strategier og udspil hvis titlen indikerer en politisk aftale, strategi eller plan
+- Vælg Høringer hvis titlen indikerer en høring eller udkast sendt i høring
+- Vælg Øvrige myndighedsnyheder i alle andre tilfælde
+- Sproget skal være sagligt, præcist og neutralt — egnet til professionel juridisk brug
+- Beskriv kun hvad titlen angiver — antag, udled eller suppler ikke"""
+
+    def _kald_api(prompt_text):
+        return requests.post(
             "https://api.anthropic.com/v1/messages",
             headers={
                 "Content-Type":      "application/json",
@@ -204,30 +240,27 @@ Svar KUN med beskrivelsesteksten — ingen overskrift, ingen JSON, ingen præamb
             },
             json={
                 "model":      "claude-haiku-4-5",
-                "max_tokens": 200,
-                "messages":   [{"role": "user", "content": prompt}],
+                "max_tokens": 400,
+                "messages":   [{"role": "user", "content": prompt_text}],
             },
             timeout=TIMEOUT,
         )
+
+    try:
+        r = _kald_api(prompt)
         if r.status_code == 429:
             print("  ⏳ Rate limit — venter 10 sek...")
             time.sleep(10)
-            r = requests.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={
-                    "Content-Type":      "application/json",
-                    "x-api-key":         ANTHROPIC_API_KEY,
-                    "anthropic-version": "2023-06-01",
-                },
-                json={
-                    "model":      "claude-haiku-4-5",
-                    "max_tokens": 200,
-                    "messages":   [{"role": "user", "content": prompt}],
-                },
-                timeout=TIMEOUT,
-            )
+            r = _kald_api(prompt)
         r.raise_for_status()
-        return r.json()["content"][0]["text"].strip()
+        raw = r.json()["content"][0]["text"].strip()
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+        data = json.loads(raw)
+        # Valider kategori
+        if data.get("kategori") not in KATEGORIER:
+            data["kategori"] = "Øvrige myndighedsnyheder"
+        return data
     except Exception as e:
         print(f"  ⚠️  Claude-kald fejlede for '{titel[:40]}': {e}")
         return None
@@ -440,12 +473,58 @@ def _normalise_url(href, base_url):
     return base_url.rstrip("/") + "/" + href
 
 
+# URL-segmenter og titler der indikerer navigation/footer — ikke nyheder
+_NAV_URL_SEGMENTER = {
+    "kontakt", "contact", "om-os", "about", "job", "ledige-stillinger",
+    "cookies", "privatlivs", "persondatapolitik", "tilgaengelighedserklaering",
+    "was.digst", "whistleblower", "energimaerkning", "energieffektivitetsplan",
+    "abonner", "nyhedsbrev", "tilmeld", "linkedin", "twitter", "bluesky",
+    "facebook", "instagram", "youtube", "rss", "sitemap", "login",
+    "english", "borger", "erhverv", "publikationer", "parkering",
+    "aktindsigt", "annoncer", "presse-kontakt", "digital-post",
+}
+
+_NAV_TITLER = {
+    "kontakt", "om os", "job", "cookies", "english", "borger", "erhverv",
+    "publikationer", "parkering", "aktindsigt", "annoncering", "annonceringer",
+    "tilgængelighedserklæring", "whistleblowerordning", "persondatapolitik",
+    "nyhedsbrev", "tilmeld nyhedsbrev", "følg os", "nyttige links", "genveje",
+    "ledige stillinger", "linkedin", "x", "bluesky", "facebook",
+    "energimærkning", "energieffektivitetsplan", "seneste nyheder",
+    "privatlivs- og cookiepolitik", "miljøministeriet", "kystdirektoratet",
+    "retningslinjer for brug af sociale medier",
+    "retningslinjer for aktiv informationspligt",
+}
+
+
+def _er_nav_link(titel, url):
+    """Returnerer True hvis linket ser ud til at være navigation/footer."""
+    titel_lower = titel.strip().lower()
+    if titel_lower in _NAV_TITLER:
+        return True
+    # Tjek URL-segmenter
+    from urllib.parse import urlparse
+    path = urlparse(url).path.lower()
+    for seg in _NAV_URL_SEGMENTER:
+        if f"/{seg}" in path or path.endswith(seg):
+            return True
+    # For kort titel er det sandsynligvis navigation
+    if len(titel.strip()) < 8:
+        return True
+    return False
+
+
 def _html_items_to_news(items, source, seen, cutoff):
-    """Konverterer (titel, href, dato_text)-tupler til news-dicts."""
+    """Konverterer (titel, href, dato_text)-tupler til news-dicts.
+    Filtrerer navigation og footer-links fra.
+    """
     results = []
     seen_urls = set()
     for titel, href, dato_text in items:
         full_url = _normalise_url(href, source["url"])
+        # Filtrer nav/footer
+        if _er_nav_link(titel, full_url):
+            continue
         if full_url in seen or full_url in seen_urls:
             continue
         dato = _parse_danish_date(dato_text) if dato_text else None
@@ -676,34 +755,63 @@ def _format_dato(dato):
     return f"{dato.day}. {MAANEDER[dato.month]} {dato.year}"
 
 
-def _nyhed_html(item):
-    """Returnerer HTML-blok for én nyhed (nyhedskilder)."""
-    dato_str = _format_dato(item.get("dato"))
-    dato_html = (
-        f'<p style="margin:0 0 4px 0;font-size:11px;color:#888;">{dato_str}</p>'
-        if dato_str else ""
-    )
+def _item_html(item, farve):
+    """Returnerer HTML-blok for ét element (nyhed eller høring) med Lisas format."""
+    dato_str    = _format_dato(item.get("dato"))
+    kilde_navn  = item.get("navn", item.get("myndighed", ""))
     beskrivelse = item.get("beskrivelse", "")
+    bemærkninger = item.get("bemærkninger", "")
+    frist       = item.get("frist", "")
+
+    # Meta-linje: kilde · dato
+    meta_dele = []
+    if kilde_navn:
+        meta_dele.append(kilde_navn)
+    if dato_str:
+        meta_dele.append(dato_str)
+    meta_html = (
+        f'<p style="margin:0 0 4px 0;font-size:11px;color:#888;">' +
+        " · ".join(meta_dele) + "</p>"
+        if meta_dele else ""
+    )
+
     besk_html = (
         f'<p style="margin:6px 0 0 0;font-size:13px;color:#333;">{beskrivelse}</p>'
         if beskrivelse else ""
     )
+
+    # Bemærkninger: brug frist fra høring hvis tilgængeligt
+    bem_tekst = bemærkninger or (f"Høringsfrist: {frist}" if frist and frist != "ikke angivet" else "")
+    if not bem_tekst:
+        bem_tekst = "Bemærkninger: ikke angivet"
+    bem_html = (
+        f'<p style="margin:5px 0 0 0;font-size:12px;color:#555;">' +
+        f'<strong>Bemærkninger:</strong> {bem_tekst}</p>'
+    )
+
     return f"""
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
-       style="margin-bottom:10px;border-left:3px solid {item['farve']};
-              background:#F4F6F8;border-radius:0;">
+       style="margin-bottom:10px;border-left:3px solid {farve};
+              background:#F4F6F8;">
   <tr>
     <td style="padding:10px 14px;">
-      {dato_html}
+      {meta_html}
       <p style="margin:0;font-size:14px;font-weight:bold;">
         <a href="{item['url']}" style="color:{BRAND_DARK};text-decoration:none;">
           {item['titel']}
         </a>
       </p>
       {besk_html}
+      {bem_html}
     </td>
   </tr>
 </table>"""
+
+
+def _nyhed_html(item):
+    """Wrapper — bruges stadig fra ældre kode."""
+    farve = KATEGORI_FARVER.get(item.get("kategori", ""), item.get("farve", "#1A5276"))
+    return _item_html(item, farve)
 
 
 def _hoering_html(item):
@@ -765,39 +873,49 @@ def _sektion_html(overskrift, farve, indhold_html):
 
 def build_html(news_by_source, hearings):
     """
-    Bygger den fulde HTML-e-mail.
-    news_by_source: dict  kilde_id → liste af nyheds-dicts
-    hearings:       liste af høring-dicts
+    Bygger den fulde HTML-e-mail grupperet i Lisas 6 kategorier.
+    news_by_source: dict  kilde_id → liste af nyheds-dicts (med "kategori"-felt)
+    hearings:       liste af høring-dicts (placeres i "Høringer")
     """
     now      = datetime.now(timezone.utc)
     dato_str = _format_dato(now)
 
-    total_nyheder  = sum(len(v) for v in news_by_source.values())
-    total_horinger = len(hearings)
-    total          = total_nyheder + total_horinger
+    # Saml alle elementer i én liste og tilføj høringer som "Høringer"-kategori
+    alle_items = []
+    for items in news_by_source.values():
+        alle_items.extend(items)
+    for h in hearings:
+        h_copy = dict(h)
+        h_copy["kategori"] = "Høringer"
+        alle_items.append(h_copy)
+
+    total = len(alle_items)
 
     subject = (
         f"Energi & Forsyning — ugentlig opdatering {dato_str} "
-        f"({total} {'nyhed' if total == 1 else 'nyheder'})"
+        f"({total} {'element' if total == 1 else 'elementer'})"
     )
 
-    # Byg sektioner
-    sektioner_html = ""
+    # Gruppér i de 6 kategorier i Lisas rækkefølge
+    fra_kategori = {k: [] for k in KATEGORIER}
+    for item in alle_items:
+        kat = item.get("kategori", "Øvrige myndighedsnyheder")
+        if kat not in fra_kategori:
+            kat = "Øvrige myndighedsnyheder"
+        fra_kategori[kat].append(item)
 
-    # Nyhedskilder
-    for source in NEWS_SOURCES:
-        items = news_by_source.get(source["id"], [])
+    # Byg sektioner — kun kategorier med indhold
+    sektioner_html = ""
+    for kat in KATEGORIER:
+        items = fra_kategori[kat]
         if not items:
             continue
-        blokke = "".join(_nyhed_html(it) for it in items)
-        sektioner_html += _sektion_html(source["navn"], SECTION_ENERGI, blokke)
+        farve  = KATEGORI_FARVER[kat]
+        blokke = "".join(_item_html(it, farve) for it in items)
+        sektioner_html += _sektion_html(f"{kat} ({len(items)})", farve, blokke)
 
-    # Høringer
-    if hearings:
-        blokke = "".join(_hoering_html(it) for it in hearings)
-        sektioner_html += _sektion_html(
-            f"Høringer ({len(hearings)})", SECTION_HOERING, blokke
-        )
+    total_nyheder  = sum(len(v) for v in news_by_source.values())
+    total_horinger = len(hearings)
 
     if not sektioner_html:
         sektioner_html = """
@@ -849,9 +967,9 @@ def build_html(news_by_source, hearings):
                      border-bottom:1px solid #e0e0e0;">
             <p style="margin:0;font-size:13px;color:#555;">
               Denne uge: <strong>{total_nyheder} {'nyhed' if total_nyheder == 1 else 'nyheder'}</strong>
-              fra myndighederne
-              og <strong>{total_horinger} {'høring' if total_horinger == 1 else 'høringer'}</strong>
-              på Høringsportalen.
+              fra myndighederne og
+              <strong>{total_horinger} {'høring' if total_horinger == 1 else 'høringer'}</strong>
+              på Høringsportalen · i alt {total} elementer.
             </p>
           </td>
         </tr>
@@ -925,15 +1043,25 @@ if __name__ == "__main__":
         if items:
             news_by_source[source["id"]] = items
 
-    # ── AI-beskrivelser (alle nyheder — ingen loft) ──
+    # ── AI-klassificering (kategori + beskrivelse + bemærkninger) ──
     if ANTHROPIC_API_KEY:
         alle_nyheder = [it for items in news_by_source.values() for it in items]
-        print(f"▶ Genererer Claude-beskrivelser for {len(alle_nyheder)} nyheder...")
+        print(f"▶ Klassificerer {len(alle_nyheder)} nyheder med Claude...")
         for it in alle_nyheder:
-            beskrivelse = claude_beskriv(it["titel"], it["navn"], it["url"])
-            if beskrivelse:
-                it["beskrivelse"] = beskrivelse
-            time.sleep(0.5)  # Undgå rate limiting
+            analyse = claude_klassificer(it["titel"], it["navn"], it["url"])
+            if analyse:
+                it["kategori"]     = analyse.get("kategori", "Øvrige myndighedsnyheder")
+                it["beskrivelse"]  = analyse.get("beskrivelse", "")
+                it["bemærkninger"] = analyse.get("bemærkninger", "ikke angivet")
+                print(f"  → [{it['kategori']}] {it['titel'][:50]}")
+            else:
+                it.setdefault("kategori", "Øvrige myndighedsnyheder")
+            time.sleep(4)    # Undgå rate limiting (Haiku-tier kræver pause)
+    else:
+        # Uden AI: sæt alle i øvrige
+        for items in news_by_source.values():
+            for it in items:
+                it.setdefault("kategori", "Øvrige myndighedsnyheder")
 
     # ── Opdatér state ──
     new_urls = set()
