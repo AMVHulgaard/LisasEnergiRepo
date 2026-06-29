@@ -76,6 +76,12 @@ NEWS_SOURCES = [
 # URL bygges i fetch_lovforslag med dato-filter på opdateringsdato.
 FT_ODA_BASE = "https://oda.ft.dk/api/Sag"
 
+# Samlings-ID: sættes som GitHub Secret FT_SAMLING eller hardcodes herunder.
+# Format: ÅÅÅÅx — fx 20252 = 2. samling 2025 (ekstraordinær efter valg/skift).
+# Opdatér ved ny samling (typisk én gang om året i oktober).
+import os as _os
+FT_SAMLING = _os.environ.get("FT_SAMLING", "20252").strip() or "20252"
+
 # Emneord der indikerer relevans for energi/forsyning/klima/miljø/beredskab.
 # Lovforslag der ikke matcher noget af dette filtreres fra.
 FT_RELEVANTE_EMNEORD = {
@@ -385,35 +391,7 @@ def fetch_hearings(seen):
 # FOLKETINGET — LOVFORSLAG VIA ODA API
 # ─────────────────────────────────────────────
 
-def _ft_aktuel_samling():
-    """
-    Henter det aktuelle samlings-ID direkte fra Folketingets ODA API.
-    Mere robust end at beregne det, da der kan være ekstraordinære samlinger
-    (fx 20252 ved regeringsskifte midt i et år).
-    Fallback: beregn ud fra måned hvis API ikke svarer.
-    """
-    try:
-        r = requests.get(
-            "https://oda.ft.dk/api/Samling?$orderby=id%20desc&$top=1&$format=json",
-            headers=SCRAPE_HEADERS,
-            timeout=TIMEOUT,
-        )
-        if r.status_code == 200:
-            data = r.json()
-            if data.get("value"):
-                samling_id = str(data["value"][0].get("id", ""))
-                if samling_id:
-                    print(f"  → Aktuel Ft-samling: {samling_id}")
-                    return samling_id
-    except Exception as e:
-        print(f"  ⚠️  Kunne ikke hente samlings-ID fra ODA: {e}")
-
-    # Fallback: beregn ud fra måned
-    now = datetime.now(timezone.utc)
-    aar = now.year if now.month >= 10 else now.year - 1
-    fallback = f"{aar}1"
-    print(f"  ⚠️  Bruger beregnet samlings-ID som fallback: {fallback}")
-    return fallback
+# FT_SAMLING er defineret som konstant øverst (fra env-var eller hardcoded)
 
 
 def fetch_lovforslag(seen):
@@ -428,7 +406,8 @@ def fetch_lovforslag(seen):
     cutoff    = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
     results   = []
     seen_urls = set()
-    samling   = _ft_aktuel_samling()
+    samling   = FT_SAMLING
+    print(f"  → Bruger samling: {samling}")
 
     # Hent seneste 100 lovforslag — dato-filtrering sker i Python nedenfor
     # (ODA API v3 dato-filter-syntaks er upålidelig)
@@ -443,7 +422,8 @@ def fetch_lovforslag(seen):
     try:
         r = requests.get(url_api, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
         if r.status_code != 200:
-            print(f"  ⚠️  Folketinget ODA: HTTP {r.status_code} — muligvis sommerpause")
+            print(f"  ⚠️  Folketinget ODA: HTTP {r.status_code} — API muligvis blokeret eller utilgængeligt")
+            print(f"     URL forsøgt: {url_api[:100]}")
             return results
 
         data  = r.json()
