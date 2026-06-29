@@ -332,12 +332,14 @@ def fetch_hearings(seen):
                 frist        = "ikke angivet"
 
                 # Summary-format: "Høringstype X · Myndighed Y · Høringsfrist DD-MM-YYYY · ..."
-                type_match  = re.search(r"Høringstype\s*([^·\n]+)", summary_clean)
-                frist_match = re.search(r"Høringsfrist\s*(\d{2}-\d{2}-\d{4})", summary_clean)
+                # Både · og almindelige mellemrum bruges som separator
+                type_match  = re.search(r"Høringstype[:\s]+([^·\n]+?)(?:\s*·|\s+Myndighed|\s+Høringsfrist|$)", summary_clean)
+                frist_match = re.search(r"Høringsfrist[:\s]+(\d{2}-\d{2}-\d{4})", summary_clean)
                 if type_match:
-                    hoering_type = type_match.group(1).strip()
+                    hoering_type = type_match.group(1).strip().rstrip("·").strip()
                 if frist_match:
                     frist = frist_match.group(1)
+                    print(f"     Frist fundet: {frist} ({titel[:40]})")
 
                 seen_urls.add(url)
                 results.append({
@@ -1054,7 +1056,7 @@ if __name__ == "__main__":
         if items:
             news_by_source[source["id"]] = items
 
-    # ── AI-klassificering (kategori + beskrivelse + bemærkninger) ──
+    # ── AI-klassificering: nyheder (kategori + beskrivelse + bemærkninger) ──
     if ANTHROPIC_API_KEY:
         alle_nyheder = [it for items in news_by_source.values() for it in items]
         print(f"▶ Klassificerer {len(alle_nyheder)} nyheder med Claude...")
@@ -1067,9 +1069,25 @@ if __name__ == "__main__":
                 print(f"  → [{it['kategori']}] {it['titel'][:50]}")
             else:
                 it.setdefault("kategori", "Øvrige myndighedsnyheder")
-            time.sleep(4)    # Undgå rate limiting (Haiku-tier kræver pause)
+            time.sleep(4)
+
+        # ── AI-beskrivelse for høringer ──
+        print(f"▶ Genererer beskrivelser for {len(hearings)} høringer med Claude...")
+        for it in hearings:
+            analyse = claude_klassificer(it["titel"], it["myndighed"], it["url"])
+            if analyse:
+                it["beskrivelse"]  = analyse.get("beskrivelse", "")
+                # Bemærkninger: brug frist fra feed hvis Claude ikke finder den
+                claude_bem = analyse.get("bemærkninger", "")
+                if it.get("frist") and it["frist"] != "ikke angivet":
+                    it["bemærkninger"] = f"Høringsfrist: {it['frist']}"
+                elif claude_bem and claude_bem.lower() != "ikke angivet":
+                    it["bemærkninger"] = claude_bem
+                else:
+                    it["bemærkninger"] = "ikke angivet"
+            time.sleep(4)
     else:
-        # Uden AI: sæt alle i øvrige
+        # Uden AI: sæt alle nyheder i øvrige
         for items in news_by_source.values():
             for it in items:
                 it.setdefault("kategori", "Øvrige myndighedsnyheder")
