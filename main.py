@@ -98,6 +98,40 @@ FT_UDELUK_EMNEORD = {
     "spil", "lotteri", "dyrevelfærd",
 }
 
+# ─────────────────────────────────────────────
+# DOMSDATABASEN — DANSKE DOMME OG KENDELSER
+# ─────────────────────────────────────────────
+DOMS_RSS_URL = (
+    "https://domsdatabasen.dk/webapi/api/Case/rss"
+    "?Title=Seneste%20domme%20og%20kendelser"
+    "&SortingParameter=PublishDate"
+    "&DescendingOrder=true"
+    "&TimeAmount=7"
+    "&TimeType=Days"
+)
+
+# Emneord til forfiltrering af domme — samme princip som FT_UDELUK_EMNEORD
+# men her er det positivt: kun domme der matcher ét ord sendes til Claude.
+# Skriv korte rodformer så "energi" også matcher "energiforsyning", "energiret" osv.
+DOMS_RELEVANTE_EMNEORD = {
+    # Energi og forsyning
+    "energi", "elforsyning", "gasforsyning", "fjernvarme", "varmeforsyning",
+    "elnet", "naturgasforsyning", "vandforsyning", "havvind", "vindmølle",
+    "solcelle", "biogas", "brint", "kraftvarme", "forsyningssikkerhed",
+    # Miljø og natur
+    "miljø", "forurening", "naturbeskyttelse", "miljøbeskyttelse",
+    "spildevand", "drikkevand", "vandindvinding", "pesticid", "kemikalie",
+    "affald", "luftforurening", "støj", "kyst", "natur",
+    # Klima og afgifter
+    "klima", "co2", "kuldioxid", "drivhusgas", "energiafgift",
+    "kuldioxidafgift", "brændstofafgift",
+    # Regulering og tilsyn
+    "forsyningstilsynet", "energistyrelsen", "energiklagenævnet",
+    "miljøstyrelsen", "naturstyrelsen",
+    # Beredskab
+    "beredskab", "kritisk infrastruktur",
+}
+
 # Fælles browser-headers til HTML-scraping
 SCRAPE_HEADERS = {
     "User-Agent": (
@@ -212,6 +246,7 @@ KATEGORIER = [
     "Vejledninger og praksis",
     "Politiske aftaler, strategier og udspil",
     "Høringer",
+    "Domme og afgørelser",
     "Øvrige myndighedsnyheder",
 ]
 
@@ -222,6 +257,7 @@ KATEGORI_FARVER = {
     "Vejledninger og praksis":                 "#1F618D",
     "Politiske aftaler, strategier og udspil": "#117A65",
     "Høringer":                                "#145A32",
+    "Domme og afgørelser":                     "#7B241C",
     "Øvrige myndighedsnyheder":                "#4A235A",
 }
 
@@ -251,7 +287,7 @@ fjernvarme, vedvarende energi, klimaregulering, miljøret, forsyningssikkerhed o
 Svar KUN med et JSON-objekt i præcis dette format (ingen præambel, ingen kodeblok):
 {{
   "relevant": true,
-  "kategori": "<én af: Lovforslag | Bekendtgørelser | Vejledninger og praksis | Politiske aftaler, strategier og udspil | Høringer | Øvrige myndighedsnyheder>",
+  "kategori": "<én af: Lovforslag | Bekendtgørelser | Vejledninger og praksis | Politiske aftaler, strategier og udspil | Høringer | Domme og afgørelser | Øvrige myndighedsnyheder>",
   "beskrivelse": "<2-4 linjer, neutral og deskriptiv beskrivelse af hovedindhold og formål. Ingen vurdering eller fortolkning. Tom streng hvis ikke relevant.>",
   "bemærkninger": "<høringsfrist, ikrafttrædelsesdato, status i lovgivningsprocessen — kun hvis det fremgår eksplicit af titlen. Ellers: ikke angivet>"
 }}
@@ -264,6 +300,7 @@ Regler:
 - Vælg Vejledninger og praksis hvis titlen indikerer en vejledning, retningslinje eller praksis
 - Vælg Politiske aftaler, strategier og udspil hvis titlen indikerer en politisk aftale, strategi eller plan
 - Vælg Høringer hvis titlen indikerer en høring eller udkast sendt i høring
+- Vælg Domme og afgørelser hvis titlen indikerer en dom, kendelse, afgørelse eller retsafgørelse
 - Vælg Øvrige myndighedsnyheder i alle andre tilfælde
 - Sproget skal være sagligt, præcist og neutralt — egnet til professionel juridisk brug
 - Beskriv kun hvad titlen angiver — antag, udled eller suppler ikke"""
@@ -502,6 +539,89 @@ def fetch_lovforslag(seen):
         print(f"  ⚠️  Folketinget ODA: {type(e).__name__}: {e}")
 
     print(f"  → Folketinget ODA: {len(results)} relevante lovforslag")
+    return results
+
+
+# ─────────────────────────────────────────────
+# DOMSDATABASEN — DOMME OG KENDELSER
+# ─────────────────────────────────────────────
+
+def fetch_domsdatabasen(seen):
+    """
+    Henter danske domme og kendelser fra Domsdatabasen via RSS.
+    Returnerer liste af dicts klar til Claude-klassificering.
+    Domsdatabasen returnerer seneste 7 dages domme — matcher LOOKBACK_DAYS.
+    """
+    import xml.etree.ElementTree as ET
+    cutoff    = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    results   = []
+    seen_urls = set()
+
+    try:
+        r = requests.get(DOMS_RSS_URL, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
+        if r.status_code != 200:
+            print(f"  ⚠️  Domsdatabasen: HTTP {r.status_code}")
+            return results
+
+        root    = ET.fromstring(r.content)
+        channel = root.find("channel") or root
+        items   = channel.findall("item") or root.findall(".//item")
+        print(f"  → Domsdatabasen: {len(items)} domme i feed")
+
+        for entry in items:
+            def _get(tag):
+                el = entry.find(tag)
+                return el.text.strip() if el is not None and el.text else ""
+
+            titel    = _get("title")
+            url      = _get("link")
+            date_str = _get("pubDate")
+            desc     = _get("description")
+
+            if not titel or not url:
+                continue
+            if url in seen or url in seen_urls:
+                continue
+
+            # Dato
+            dato = None
+            for fmt in ("%a, %d %b %Y %H:%M:%S %z", "%a, %d %b %Y %H:%M:%S %Z",
+                        "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%d"):
+                try:
+                    dato = datetime.strptime(date_str[:31].strip(), fmt)
+                    if not dato.tzinfo:
+                        dato = dato.replace(tzinfo=timezone.utc)
+                    break
+                except ValueError:
+                    continue
+
+            if dato and dato < cutoff:
+                continue
+
+            # Forfilter — kun domme med relevante emneord i titel eller beskrivelse
+            import re as _re
+            søgetekst = f"{titel} {desc}".lower()
+            if not any(_re.search(r"\b" + _re.escape(o) + r"\w*", søgetekst)
+                       for o in DOMS_RELEVANTE_EMNEORD):
+                continue
+
+            seen_urls.add(url)
+            results.append({
+                "kilde_id":     "doms",
+                "navn":         "Domsdatabasen",
+                "titel":        titel,
+                "url":          url,
+                "dato":         dato,
+                "farve":        "#7B241C",
+                "beskrivelse":  desc[:200] if desc else "",
+                "bemærkninger": "ikke angivet",
+                "kategori":     "",  # Sættes af Claude
+            })
+
+    except Exception as e:
+        print(f"  ⚠️  Domsdatabasen: {type(e).__name__}: {e}")
+
+    print(f"  → Domsdatabasen: {len(results)} domme efter emneforfilter (Claude vurderer resten)")
     return results
 
 
@@ -1194,6 +1314,10 @@ if __name__ == "__main__":
     print("▶ Henter lovforslag fra Folketinget ODA API...")
     lovforslag = fetch_lovforslag(seen)
 
+    # ── Hent domme fra Domsdatabasen ──
+    print("▶ Henter domme fra Domsdatabasen...")
+    domme = fetch_domsdatabasen(seen)
+
     # ── Hent nyheder fra nyhedskilder (KEFM RSS) ──
     news_by_source = {}
     for source in NEWS_SOURCES:
@@ -1202,9 +1326,11 @@ if __name__ == "__main__":
         if items:
             news_by_source[source["id"]] = items
 
-    # Tilføj lovforslag som egen kilde
+    # Tilføj lovforslag og domme som egne kilder
     if lovforslag:
         news_by_source["ft"] = lovforslag
+    if domme:
+        news_by_source["doms"] = domme
 
     # ── AI-klassificering: nyheder (kategori + beskrivelse + bemærkninger) ──
     if ANTHROPIC_API_KEY:
@@ -1233,20 +1359,15 @@ if __name__ == "__main__":
         if kasserede:
             print(f"  → {kasserede} kasseret af Claude (ikke relevant for energi/forsyning/klima/miljø)")
 
-        # ── AI-beskrivelse for høringer ──
+        # ── AI-beskrivelse for høringer — alle der vises i mailen ──
+        # hearings inkluderer kun nye (ikke-sete), men vi beskriver dem alle
         print(f"▶ Genererer beskrivelser for {len(hearings)} høringer med Claude...")
         for it in hearings:
+            if it.get("beskrivelse"):
+                continue  # Allerede beskrevet
             analyse = claude_klassificer(it["titel"], it["myndighed"], it["url"])
             if analyse:
-                it["beskrivelse"]  = analyse.get("beskrivelse", "")
-                # Bemærkninger: brug frist fra feed hvis Claude ikke finder den
-                claude_bem = analyse.get("bemærkninger", "")
-                if it.get("frist") and it["frist"] != "ikke angivet":
-                    it["bemærkninger"] = f"Høringsfrist: {it['frist']}"
-                elif claude_bem and claude_bem.lower() != "ikke angivet":
-                    it["bemærkninger"] = claude_bem
-                else:
-                    it["bemærkninger"] = "ikke angivet"
+                it["beskrivelse"] = analyse.get("beskrivelse", "")
             time.sleep(8)
     else:
         # Uden AI: sæt alle nyheder i øvrige
