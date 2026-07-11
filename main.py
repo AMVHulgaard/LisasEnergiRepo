@@ -496,7 +496,7 @@ def fetch_lovforslag(seen):
 
 
             # Byg URL til ft.dk
-            nummer  = item.get("nummer", "")
+            nummer  = item.get("nummer", "").replace(" ", "")  # "L 5" → "L5"
             sml     = item.get("samlingid") or samling
             if nummer:
                 ft_url = f"https://www.ft.dk/samling/{sml}/lovforslag/{nummer}/index.htm"
