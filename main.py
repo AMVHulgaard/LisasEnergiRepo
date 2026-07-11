@@ -452,6 +452,7 @@ def fetch_lovforslag(seen):
     """
     from urllib.parse import quote
     cutoff    = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    cutoff    = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
     results   = []
     seen_urls = set()
     samling   = FT_SAMLING
@@ -515,6 +516,10 @@ def fetch_lovforslag(seen):
                     ).replace(tzinfo=timezone.utc)
                 except ValueError:
                     dato = _parse_danish_date(dato_str)
+
+            # Dato-filter — spring over hvis ældre end LOOKBACK_DAYS
+            if dato and dato < cutoff:
+                continue
 
             # Status til bemærkninger
             status = item.get("status", "")
@@ -1375,9 +1380,10 @@ if __name__ == "__main__":
             for it in items:
                 it.setdefault("kategori", "Øvrige myndighedsnyheder")
 
-    # ── Opdatér state — kun høringer ──
-    nye_hoering_urls = {it["url"] for it in hearings}
-    save_state(seen | nye_hoering_urls)
+    # ── Opdatér state — høringer + lovforslag ──
+    nye_hoering_urls  = {it["url"] for it in hearings}
+    nye_lovforslag_urls = {it["url"] for it in news_by_source.get("ft", [])}
+    save_state(seen | nye_hoering_urls | nye_lovforslag_urls)
 
     # ── Byg HTML ──
     print("▶ Bygger HTML-mail...")
