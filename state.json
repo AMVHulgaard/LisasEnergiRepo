@@ -17,8 +17,10 @@
     "https://hoeringsportalen.dk/Hearing/Details/71337",
     "https://hoeringsportalen.dk/Hearing/Details/71341",
     "https://hoeringsportalen.dk/Hearing/Details/71347",
+    "https://hoeringsportalen.dk/Hearing/Details/71352",
+    "https://hoeringsportalen.dk/Hearing/Details/71354",
     "https://www.ft.dk/samling/20252/lovforslag/L5/index.htm"
   ],
-  "last_updated": "2026-07-29T08:16:14.980436+00:00",
+  "last_updated": "2026-08-05T08:43:40.946213+00:00",
   "_note": "Kun høring-URLs gemmes. Nyhedssider dedupes via LOOKBACK_DAYS."
 }
