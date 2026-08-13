@@ -66,6 +66,27 @@ NEWS_SOURCES = [
         "type":  "rss",
         "farve": "#1A5276",
     },
+    {
+        "id":    "energinet",
+        "navn":  "Energinet",
+        "url":   "https://via.ritzau.dk/rss/releases/latest?publisherId=10304728",
+        "type":  "rss",
+        "farve": "#1A5276",
+    },
+    {
+        "id":    "eu_energy",
+        "navn":  "EU-Kommissionen (energi)",
+        "url":   "https://ec.europa.eu/commission/presscorner/api/rss?language=en&policyarea=19&pagesize=20",
+        "type":  "rss",
+        "farve": "#003399",
+    },
+    {
+        "id":    "eu_env",
+        "navn":  "EU-Kommissionen (miljø og klima)",
+        "url":   "https://ec.europa.eu/commission/presscorner/api/rss?language=en&policyarea=22&pagesize=20",
+        "type":  "rss",
+        "farve": "#003399",
+    },
 ]
 
 # ─────────────────────────────────────────────
