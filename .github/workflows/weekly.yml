@@ -1,8 +1,6 @@
 name: Weekly energy update
 
 on:
-  schedule:
-    - cron: '45 6 * * 3'  # Onsdag kl. 08:45 dansk sommertid (07:45 vintertid)
   workflow_dispatch:
 
 permissions:
