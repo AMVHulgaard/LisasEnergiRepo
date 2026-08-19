@@ -1,12 +1,15 @@
 {
   "horinger_sete": [
+    "https://hoeringsportalen.dk/Hearing/Details/70729",
     "https://hoeringsportalen.dk/Hearing/Details/71028",
     "https://hoeringsportalen.dk/Hearing/Details/71065",
     "https://hoeringsportalen.dk/Hearing/Details/71182",
     "https://hoeringsportalen.dk/Hearing/Details/71191",
+    "https://hoeringsportalen.dk/Hearing/Details/71198",
     "https://hoeringsportalen.dk/Hearing/Details/71219",
     "https://hoeringsportalen.dk/Hearing/Details/71231",
     "https://hoeringsportalen.dk/Hearing/Details/71239",
+    "https://hoeringsportalen.dk/Hearing/Details/71256",
     "https://hoeringsportalen.dk/Hearing/Details/71257",
     "https://hoeringsportalen.dk/Hearing/Details/71309",
     "https://hoeringsportalen.dk/Hearing/Details/71322",
@@ -20,9 +23,12 @@
     "https://hoeringsportalen.dk/Hearing/Details/71352",
     "https://hoeringsportalen.dk/Hearing/Details/71354",
     "https://hoeringsportalen.dk/Hearing/Details/71364",
+    "https://hoeringsportalen.dk/Hearing/Details/71367",
+    "https://hoeringsportalen.dk/Hearing/Details/71370",
+    "https://hoeringsportalen.dk/Hearing/Details/71377",
     "https://www.ft.dk/samling/20252/lovforslag/L10/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L5/index.htm"
   ],
-  "last_updated": "2026-08-13T07:50:42.899009+00:00",
+  "last_updated": "2026-08-19T06:17:59.759373+00:00",
   "_note": "Kun høring-URLs gemmes. Nyhedssider dedupes via LOOKBACK_DAYS."
 }
