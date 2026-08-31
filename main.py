@@ -87,6 +87,13 @@ NEWS_SOURCES = [
         "type":  "rss",
         "farve": "#003399",
     },
+    {
+        "id":    "mim",
+        "navn":  "Miljøministeriet",
+        "url":   "https://via.ritzau.dk/rss/releases/latest?publisherId=13560422",
+        "type":  "rss",
+        "farve": "#1A5276",
+    },
 ]
 
 # ─────────────────────────────────────────────
@@ -413,8 +420,13 @@ def fetch_hearings(seen):
 
                 if dato < cutoff:
                     continue
-                if not url or url in seen or url in seen_urls:
+                # Hvis URL er set før men publiceret-dato er ny → opdateret høring
+                er_opdateret = url in seen
+                if not url or url in seen_urls:
                     continue
+                if er_opdateret:
+                    # Markér som opdateret — vises igen med note i beskrivelsen
+                    pass  # Fortsæt til results.append nedenfor
 
                 # Udpak ekstra metadata fra summary
                 summary = entry.findtext("atom:summary", "", ns) or ""
@@ -437,14 +449,15 @@ def fetch_hearings(seen):
 
                 seen_urls.add(url)
                 results.append({
-                    "kilde":    "Høringsportalen",
+                    "kilde":     "Høringsportalen",
                     "myndighed": myndighed,
-                    "titel":    titel,
-                    "url":      url,
-                    "dato":     dato,
-                    "type":     hoering_type,
-                    "frist":    frist,
-                    "summary":  summary_clean[:300],
+                    "titel":     titel,
+                    "url":       url,
+                    "dato":      dato,
+                    "type":      hoering_type,
+                    "frist":     frist,
+                    "summary":   summary_clean[:300],
+                    "opdateret": er_opdateret,
                 })
 
         except ET.ParseError as e:
@@ -1393,7 +1406,13 @@ if __name__ == "__main__":
                 continue  # Allerede beskrevet
             analyse = claude_klassificer(it["titel"], it["myndighed"], it["url"])
             if analyse:
-                it["beskrivelse"] = analyse.get("beskrivelse", "")
+                beskrivelse = analyse.get("beskrivelse", "")
+                # Tilføj note hvis høringen er en opdatering af en tidligere set høring
+                if it.get("opdateret") and beskrivelse:
+                    beskrivelse = f"Opdateret høringsnotat. {beskrivelse}"
+                elif it.get("opdateret"):
+                    beskrivelse = "Opdateret høringsnotat publiceret på Høringsportalen."
+                it["beskrivelse"] = beskrivelse
             time.sleep(8)
     else:
         # Uden AI: sæt alle nyheder i øvrige
@@ -1402,7 +1421,8 @@ if __name__ == "__main__":
                 it.setdefault("kategori", "Øvrige myndighedsnyheder")
 
     # ── Opdatér state — høringer + lovforslag ──
-    nye_hoering_urls  = {it["url"] for it in hearings}
+    # Kun NYE høringer (ikke opdaterede) tilføjes til seen
+    nye_hoering_urls    = {it["url"] for it in hearings if not it.get("opdateret")}
     nye_lovforslag_urls = {it["url"] for it in news_by_source.get("ft", [])}
     save_state(seen | nye_hoering_urls | nye_lovforslag_urls)
 
