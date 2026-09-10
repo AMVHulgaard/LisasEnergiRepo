@@ -19,8 +19,16 @@ CLIENT_SECRET     = os.environ.get("CLIENT_SECRET", "").strip()
 SENDER_UPN        = os.environ.get("SENDER_UPN", "").strip()
 RECIPIENT_1       = os.environ.get("RECIPIENT_1", "").strip()
 RECIPIENT_2       = os.environ.get("RECIPIENT_2", "").strip()
-# Alle modtagere samlet — tilføj RECIPIENT_3 osv. efter behov
-RECIPIENTS = [r for r in [RECIPIENT_1, RECIPIENT_2] if r]
+RECIPIENT_3       = os.environ.get("RECIPIENT_3", "").strip()
+RECIPIENT_4       = os.environ.get("RECIPIENT_4", "").strip()
+RECIPIENT_5       = os.environ.get("RECIPIENT_5", "").strip()
+RECIPIENT_6       = os.environ.get("RECIPIENT_6", "").strip()
+RECIPIENT_7       = os.environ.get("RECIPIENT_7", "").strip()
+# Alle modtagere samlet — tilføj nye ved at sætte GitHub Secret + tilføje til listen
+RECIPIENTS = [r for r in [
+    RECIPIENT_1, RECIPIENT_2, RECIPIENT_3, RECIPIENT_4,
+    RECIPIENT_5, RECIPIENT_6, RECIPIENT_7,
+] if r]
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 
 # ─────────────────────────────────────────────
