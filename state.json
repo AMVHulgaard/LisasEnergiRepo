@@ -1,0 +1,15 @@
+{
+  "horinger_sete": [
+    "https://hoeringsportalen.dk/Hearing/Details/71303",
+    "https://hoeringsportalen.dk/Hearing/Details/71325",
+    "https://hoeringsportalen.dk/Hearing/Details/71469",
+    "https://hoeringsportalen.dk/Hearing/Details/71471",
+    "https://hoeringsportalen.dk/Hearing/Details/71474",
+    "https://hoeringsportalen.dk/Hearing/Details/71475",
+    "https://hoeringsportalen.dk/Hearing/Details/71491",
+    "https://hoeringsportalen.dk/Hearing/Details/71497",
+    "https://hoeringsportalen.dk/Hearing/Details/71498"
+  ],
+  "last_updated": "2026-09-18T07:19:09.603951+00:00",
+  "_note": "Kun høring-URLs gemmes. Nyhedssider dedupes via LOOKBACK_DAYS."
+}
