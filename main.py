@@ -1320,6 +1320,8 @@ if __name__ == "__main__":
             "RECIPIENT_2":   RECIPIENT_2,
         }.items() if not v
     ]
+    if not RECIPIENTS:
+        raise RuntimeError("Ingen modtagere sat — tjek RECIPIENT_1 til RECIPIENT_7")
     if missing:
         raise RuntimeError(f"Manglende GitHub secrets: {', '.join(missing)}")
 
@@ -1420,6 +1422,6 @@ if __name__ == "__main__":
     print("▶ Henter Microsoft Graph-token...")
     token = get_token()
 
-    print(f"▶ Sender mail til {RECIPIENT_1} og {RECIPIENT_2}...")
+    print(f"▶ Sender mail til {len(RECIPIENTS)} modtagere: {', '.join(RECIPIENTS)}...")
     send_mail(token, subject, html)
     print("✅ Færdig.")
