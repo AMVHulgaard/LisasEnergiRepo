@@ -457,24 +457,30 @@ def fetch_hearings(seen):
                     continue
                 # er_opdateret == True: markeres i results.append og vises med note
 
-                # Udpak ekstra metadata fra summary
-                summary = entry.findtext("atom:summary", "", ns) or ""
-                summary_clean = re.sub(r"<[^>]+>", " ", summary)
-                summary_clean = re.sub(r"\s+", " ", summary_clean).strip()
+                # Hent content-feltet (rigt indhold + frist + type + status)
+                content = entry.findtext("atom:content", "", ns) or ""
+                content_clean = re.sub(r"<[^>]+>", " ", content)
+                content_clean = re.sub(r"\s+", " ", content_clean).strip()
 
-                # Forsøg at udpak type og frist fra summary
+                # Udpak type, frist og status fra content-feltets afsluttende linje
+                # Format: "Myndighed: X  Type: Y  Høringsfrist: DD-MM-YYYY  Status: Z"
                 hoering_type = ""
                 frist        = ""
+                status       = ""
 
-                # Summary-format: "Høringstype X · Myndighed Y · Høringsfrist DD-MM-YYYY · ..."
-                # Både · og almindelige mellemrum bruges som separator
-                type_match  = re.search(r"Høringstype[:\s]+([^·\n]+?)(?:\s*·|\s+Myndighed|\s+Høringsfrist|$)", summary_clean)
-                frist_match = re.search(r"Høringsfrist[:\s]+(\d{2}-\d{2}-\d{4})", summary_clean)
+                type_match   = re.search(r"Type:\s*([^\n<]+?)(?:\s*Høringsfrist|\s*Status|$)", content_clean)
+                frist_match  = re.search(r"Høringsfrist:\s*(\d{2}-\d{2}-\d{4})", content_clean)
+                status_match = re.search(r"Status:\s*(\w+)", content_clean)
+
                 if type_match:
-                    hoering_type = type_match.group(1).strip().rstrip("·").strip()
+                    hoering_type = type_match.group(1).strip()
                 if frist_match:
                     frist = frist_match.group(1)
-                    print(f"     Frist fundet: {frist} ({titel[:40]})")
+                if status_match:
+                    status = status_match.group(1).strip()
+
+                # Rens indholdet for metadata-linjen i bunden
+                uddrag = re.sub(r"Myndighed:.*$", "", content_clean, flags=re.DOTALL).strip()
 
                 seen_urls.add(url)
                 results.append({
@@ -485,7 +491,8 @@ def fetch_hearings(seen):
                     "dato":      dato,
                     "type":      hoering_type,
                     "frist":     frist,
-                    "summary":   summary_clean[:300],
+                    "status":    status,
+                    "summary":   uddrag[:600],
                     "opdateret": er_opdateret,
                 })
 
@@ -1401,6 +1408,17 @@ if __name__ == "__main__":
                 elif it.get("opdateret"):
                     beskrivelse = "Opdateret høringsnotat publiceret på Høringsportalen."
                 it["beskrivelse"] = beskrivelse
+
+            # Sæt bemærkninger med høringsfrist og status
+            frist  = it.get("frist", "")
+            status = it.get("status", "")
+            bem_dele = []
+            if frist:
+                bem_dele.append(f"Høringsfrist: {frist}")
+            if status and status.lower() not in ("igang",):
+                # Vis status hvis den er andet end normal "Igang"
+                bem_dele.append(f"Status: {status}")
+            it["bemærkninger"] = " · ".join(bem_dele) if bem_dele else ""
             time.sleep(8)
     else:
         # Uden AI: sæt alle nyheder i øvrige
