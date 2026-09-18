@@ -31,6 +31,11 @@ jobs:
           SENDER_UPN: ${{ secrets.SENDER_UPN }}
           RECIPIENT_1: ${{ secrets.RECIPIENT_1 }}
           RECIPIENT_2: ${{ secrets.RECIPIENT_2 }}
+          RECIPIENT_3: ${{ secrets.RECIPIENT_3 }}
+          RECIPIENT_4: ${{ secrets.RECIPIENT_4 }}
+          RECIPIENT_5: ${{ secrets.RECIPIENT_5 }}
+          RECIPIENT_6: ${{ secrets.RECIPIENT_6 }}
+          RECIPIENT_7: ${{ secrets.RECIPIENT_7 }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python main.py
 
