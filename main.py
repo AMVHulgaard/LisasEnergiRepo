@@ -29,8 +29,7 @@ RECIPIENTS = [r for r in [
     RECIPIENT_5, RECIPIENT_6,
 ] if r]
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-GOOGLE_API_KEY    = os.environ.get("GOOGLE_API_KEY", "").strip()
-GOOGLE_CSE_ID     = os.environ.get("GOOGLE_CSE_ID", "").strip()
+# GOOGLE_API_KEY og GOOGLE_CSE_ID er ikke i brug — se kommentarer ovenfor
 
 # ─────────────────────────────────────────────
 # INDSTILLINGER
@@ -118,6 +117,13 @@ NEWS_SOURCES = [
         "id":    "df",
         "navn":  "Dansk Fjernvarme",
         "url":   "https://via.ritzau.dk/rss/releases/latest?publisherId=3320505",
+        "type":  "rss",
+        "farve": "#1A5276",
+    },
+    {
+        "id":    "fsts",
+        "navn":  "Forsyningstilsynet",
+        "url":   "https://via.ritzau.dk/rss/releases/latest?publisherId=13560270",
         "type":  "rss",
         "farve": "#1A5276",
     },
@@ -749,146 +755,92 @@ def fetch_domsdatabasen(seen):
     return results
 
 # ─────────────────────────────────────────────
-# FORSYNINGSTILSYNET — AFGØRELSER VIA GOOGLE
+# FORSYNINGSTILSYNET — AFGØRELSER
 # ─────────────────────────────────────────────
+# afg.forsyningstilsynet.dk er blokeret fra GitHub Actions.
+# Workaround: Pressemeddelelser om afgørelser hentes via Via Ritzau
+# (publisherId 13560270) — tilføjet til NEWS_SOURCES ovenfor.
+# Høringer hentes desuden via Høringsportalen (feed 665).
 
 def fetch_forsyningstilsynet_afgorelser(seen):
-    """
-    Henter nye afgørelser fra Forsyningstilsynets afgørelsesdatabase
-    via Google Custom Search API (afg.forsyningstilsynet.dk er JS-renderet
-    og kræver login til API'et — Google indekserer siden offentligt).
-    Returnerer liste af dicts klar til Claude-klassificering.
-    """
-    if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
-        print("  ⚠️  GOOGLE_API_KEY eller GOOGLE_CSE_ID mangler — springer over")
-        return []
-
-    results   = []
-    seen_urls = set()
-
-    # Byg datofilter til Google
-    cutoff    = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
-    after_str = cutoff.strftime("%Y-%m-%d")
-
-    try:
-        r = requests.get(
-            "https://www.googleapis.com/customsearch/v1",
-            params={
-                "key":        GOOGLE_API_KEY,
-                "cx":         GOOGLE_CSE_ID,
-                "q":          f"afgørelse after:{after_str}",
-                "dateRestrict": f"d{LOOKBACK_DAYS}",
-                "num":        10,
-            },
-            timeout=TIMEOUT,
-        )
-        if r.status_code != 200:
-            print(f"  ⚠️  Google CSE: HTTP {r.status_code} — {r.text[:100]}")
-            return []
-
-        data  = r.json()
-        items = data.get("items", [])
-        print(f"  → Forsyningstilsynet afgørelser (Google): {len(items)} resultater")
-
-        for item in items:
-            titel   = item.get("title", "").strip()
-            url     = item.get("link", "").strip()
-            snippet = item.get("snippet", "").strip()
-
-            if not titel or not url:
-                continue
-            if url in seen or url in seen_urls:
-                continue
-
-            # Filtrer ikke-afgørelsessider fra
-            if not any(x in url for x in ["/h/", "/afgoerelse", "/afgorelse"]):
-                continue
-
-            seen_urls.add(url)
-            results.append({
-                "kilde_id":     "fsts_afg",
-                "navn":         "Forsyningstilsynet (afgørelse)",
-                "titel":        titel,
-                "url":          url,
-                "dato":         None,
-                "farve":        "#1A5276",
-                "kategori":     "",
-                "beskrivelse":  "",
-                "bemærkninger": "",
-                "uddrag":       snippet[:600],
-            })
-
-    except Exception as e:
-        print(f"  ⚠️  Google CSE: {type(e).__name__}: {e}")
-
-    print(f"  → Forsyningstilsynet afgørelser: {len(results)} nye")
-    return results
+    """Ikke implementeret — afg.forsyningstilsynet.dk er blokeret fra GitHub Actions."""
+    print("  ℹ️  Forsyningstilsynet afgørelser: ikke tilgængeligt fra GitHub Actions")
+    return []
 
 # ─────────────────────────────────────────────
-# ENERGIKLAGENÆVNET — AFGØRELSER VIA GOOGLE
+# ENERGIKLAGENÆVNET — NYHEDER VIA NAEVNENESHUS.DK
 # ─────────────────────────────────────────────
+# ekn.naevneneshus.dk (JS-renderet) er blokeret fra GitHub Actions.
+# Workaround: naevneneshus.dk/information-fra-naevnenes-hus/ er en statisk
+# HTML-side der annoncerer vigtige afgørelser — tilgængelig fra GitHub Actions.
 
 def fetch_energiklagenaevnet(seen):
     """
-    Henter nye afgørelser fra Energiklagenævnet via Google Custom Search.
-    ekn.naevneneshus.dk er JS-renderet — Google indekserer siden offentligt.
-    Dedupliceres mod Forsyningstilsynet-afgørelser og Høringsportalen.
+    Henter nyheder om Energiklagenævnets afgørelser fra naevneneshus.dk.
+    Siden er statisk HTML og tilgængelig fra GitHub Actions.
     """
-    if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
-        return []
-
-    results   = []
+    url     = "https://naevneneshus.dk/information-fra-naevnenes-hus/"
+    cutoff  = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    results = []
     seen_urls = set()
-    after_str = (datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)).strftime("%Y-%m-%d")
 
     try:
-        r = requests.get(
-            "https://www.googleapis.com/customsearch/v1",
-            params={
-                "key":          GOOGLE_API_KEY,
-                "cx":           GOOGLE_CSE_ID,
-                "q":            f"site:ekn.naevneneshus.dk afgørelse after:{after_str}",
-                "dateRestrict": f"d{LOOKBACK_DAYS}",
-                "num":          10,
-            },
-            timeout=TIMEOUT,
-        )
+        r = requests.get(url, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
         if r.status_code != 200:
-            print(f"  ⚠️  Google CSE (EKN): HTTP {r.status_code}")
+            print(f"  ⚠️  Energiklagenævnet (naevneneshus.dk): HTTP {r.status_code}")
             return []
 
-        data  = r.json()
-        items = data.get("items", [])
-        print(f"  → Energiklagenævnet (Google): {len(items)} resultater")
+        soup = BeautifulSoup(r.text, "html.parser")
+        artikler = 0
 
-        for item in items:
-            titel   = item.get("title", "").strip()
-            url     = item.get("link", "").strip()
-            snippet = item.get("snippet", "").strip()
+        for a in soup.find_all("a", href=True):
+            href  = a["href"]
+            titel = a.get_text(strip=True)
 
-            if not titel or not url:
+            if not titel or len(titel) < 15:
                 continue
-            if url in seen or url in seen_urls:
+            if "energiklagenaevnet" not in href.lower() and                "energiklag" not in titel.lower():
                 continue
 
-            seen_urls.add(url)
+            full_url = href if href.startswith("http") else f"https://naevneneshus.dk{href}"
+            if full_url in seen or full_url in seen_urls:
+                continue
+
+            # Dato: søg i forældre-element
+            parent = a.find_parent(["li", "div", "article", "p"])
+            dato = None
+            if parent:
+                dato_m = re.search(
+                    r"(\d{1,2})\.\s*(januar|februar|marts|april|maj|juni|juli|"
+                    r"august|september|oktober|november|december)\s+(\d{4})",
+                    parent.get_text(), re.IGNORECASE
+                )
+                if dato_m:
+                    dato = _parse_danish_date(dato_m.group(0))
+
+            if dato and dato < cutoff:
+                continue
+
+            seen_urls.add(full_url)
+            artikler += 1
             results.append({
                 "kilde_id":     "ekn",
                 "navn":         "Energiklagenævnet",
                 "titel":        titel,
-                "url":          url,
-                "dato":         None,
-                "farve":        "#1A5276",
+                "url":          full_url,
+                "dato":         dato,
+                "farve":        "#7B241C",
                 "kategori":     "Domme og afgørelser",
                 "beskrivelse":  "",
                 "bemærkninger": "",
-                "uddrag":       snippet[:600],
+                "uddrag":       "",
             })
 
-    except Exception as e:
-        print(f"  ⚠️  Google CSE (EKN): {type(e).__name__}: {e}")
+        print(f"  → Energiklagenævnet (naevneneshus.dk): {len(results)} nyheder")
 
-    print(f"  → Energiklagenævnet: {len(results)} nye afgørelser")
+    except Exception as e:
+        print(f"  ⚠️  Energiklagenævnet: {type(e).__name__}: {e}")
+
     return results
 
 # ─────────────────────────────────────────────
