@@ -831,6 +831,75 @@ def fetch_forsyningstilsynet_afgorelser(seen):
 
 
 # ─────────────────────────────────────────────
+# ENERGIKLAGENÆVNET — AFGØRELSER VIA GOOGLE
+# ─────────────────────────────────────────────
+
+def fetch_energiklagenaevnet(seen):
+    """
+    Henter nye afgørelser fra Energiklagenævnet via Google Custom Search.
+    ekn.naevneneshus.dk er JS-renderet — Google indekserer siden offentligt.
+    Dedupliceres mod Forsyningstilsynet-afgørelser og Høringsportalen.
+    """
+    if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
+        return []
+
+    cutoff    = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    results   = []
+    seen_urls = set()
+    after_str = cutoff.strftime("%Y-%m-%d")
+
+    try:
+        r = requests.get(
+            "https://www.googleapis.com/customsearch/v1",
+            params={
+                "key":          GOOGLE_API_KEY,
+                "cx":           GOOGLE_CSE_ID,
+                "q":            f"site:ekn.naevneneshus.dk afgørelse after:{after_str}",
+                "dateRestrict": f"d{LOOKBACK_DAYS}",
+                "num":          10,
+            },
+            timeout=TIMEOUT,
+        )
+        if r.status_code != 200:
+            print(f"  ⚠️  Google CSE (EKN): HTTP {r.status_code}")
+            return []
+
+        data  = r.json()
+        items = data.get("items", [])
+        print(f"  → Energiklagenævnet (Google): {len(items)} resultater")
+
+        for item in items:
+            titel   = item.get("title", "").strip()
+            url     = item.get("link", "").strip()
+            snippet = item.get("snippet", "").strip()
+
+            if not titel or not url:
+                continue
+            if url in seen or url in seen_urls:
+                continue
+
+            seen_urls.add(url)
+            results.append({
+                "kilde_id":     "ekn",
+                "navn":         "Energiklagenævnet",
+                "titel":        titel,
+                "url":          url,
+                "dato":         None,
+                "farve":        "#1A5276",
+                "kategori":     "Domme og afgørelser",
+                "beskrivelse":  "",
+                "bemærkninger": "",
+                "uddrag":       snippet[:600],
+            })
+
+    except Exception as e:
+        print(f"  ⚠️  Google CSE (EKN): {type(e).__name__}: {e}")
+
+    print(f"  → Energiklagenævnet: {len(results)} nye afgørelser")
+    return results
+
+
+# ─────────────────────────────────────────────
 # KONKURRENTER — SCRAPING AF FAGLIGE ARTIKLER
 # ─────────────────────────────────────────────
 
@@ -1661,6 +1730,10 @@ if __name__ == "__main__":
     print("▶ Henter afgørelser fra Forsyningstilsynet...")
     fsts_afg = fetch_forsyningstilsynet_afgorelser(seen)
 
+    # ── Hent afgørelser fra Energiklagenævnet via Google ──
+    print("▶ Henter afgørelser fra Energiklagenævnet...")
+    ekn_afg = fetch_energiklagenaevnet(seen)
+
     # ── Hent konkurrentartikler ──
     print(f"▶ Henter artikler fra {len(KONKURRENT_SOURCES)} konkurrenter...")
     konkurrenter = fetch_konkurrenter(seen)
@@ -1680,6 +1753,8 @@ if __name__ == "__main__":
         news_by_source["doms"] = domme
     if fsts_afg:
         news_by_source["fsts_afg"] = fsts_afg
+    if ekn_afg:
+        news_by_source["ekn"] = ekn_afg
     if konkurrenter:
         news_by_source["konkurrenter"] = konkurrenter
 
