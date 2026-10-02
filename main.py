@@ -29,6 +29,8 @@ RECIPIENTS = [r for r in [
     RECIPIENT_5, RECIPIENT_6,
 ] if r]
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+GOOGLE_API_KEY    = os.environ.get("GOOGLE_API_KEY", "").strip()
+GOOGLE_CSE_ID     = os.environ.get("GOOGLE_CSE_ID", "").strip()
 
 # ─────────────────────────────────────────────
 # INDSTILLINGER
@@ -748,6 +750,83 @@ def fetch_domsdatabasen(seen):
         print(f"  ⚠️  Domsdatabasen: {type(e).__name__}: {e}")
 
     print(f"  → Domsdatabasen: {len(results)} domme efter emneforfilter (Claude vurderer resten)")
+    return results
+
+
+# ─────────────────────────────────────────────
+# FORSYNINGSTILSYNET — AFGØRELSER VIA GOOGLE
+# ─────────────────────────────────────────────
+
+def fetch_forsyningstilsynet_afgorelser(seen):
+    """
+    Henter nye afgørelser fra Forsyningstilsynets afgørelsesdatabase
+    via Google Custom Search API (afg.forsyningstilsynet.dk er JS-renderet
+    og kræver login til API'et — Google indekserer siden offentligt).
+    Returnerer liste af dicts klar til Claude-klassificering.
+    """
+    if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
+        print("  ⚠️  GOOGLE_API_KEY eller GOOGLE_CSE_ID mangler — springer over")
+        return []
+
+    cutoff   = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    results  = []
+    seen_urls = set()
+
+    # Byg datofilter til Google: after:YYYY-MM-DD
+    after_str = cutoff.strftime("%Y-%m-%d")
+
+    try:
+        r = requests.get(
+            "https://www.googleapis.com/customsearch/v1",
+            params={
+                "key":        GOOGLE_API_KEY,
+                "cx":         GOOGLE_CSE_ID,
+                "q":          f"afgørelse after:{after_str}",
+                "dateRestrict": f"d{LOOKBACK_DAYS}",
+                "num":        10,
+            },
+            timeout=TIMEOUT,
+        )
+        if r.status_code != 200:
+            print(f"  ⚠️  Google CSE: HTTP {r.status_code} — {r.text[:100]}")
+            return []
+
+        data  = r.json()
+        items = data.get("items", [])
+        print(f"  → Forsyningstilsynet afgørelser (Google): {len(items)} resultater")
+
+        for item in items:
+            titel   = item.get("title", "").strip()
+            url     = item.get("link", "").strip()
+            snippet = item.get("snippet", "").strip()
+
+            if not titel or not url:
+                continue
+            if url in seen or url in seen_urls:
+                continue
+
+            # Filtrer ikke-afgørelsessider fra
+            if not any(x in url for x in ["/h/", "/afgoerelse", "/afgorelse"]):
+                continue
+
+            seen_urls.add(url)
+            results.append({
+                "kilde_id":     "fsts_afg",
+                "navn":         "Forsyningstilsynet (afgørelse)",
+                "titel":        titel,
+                "url":          url,
+                "dato":         None,
+                "farve":        "#1A5276",
+                "kategori":     "",
+                "beskrivelse":  "",
+                "bemærkninger": "",
+                "uddrag":       snippet[:600],
+            })
+
+    except Exception as e:
+        print(f"  ⚠️  Google CSE: {type(e).__name__}: {e}")
+
+    print(f"  → Forsyningstilsynet afgørelser: {len(results)} nye")
     return results
 
 
@@ -1578,6 +1657,10 @@ if __name__ == "__main__":
     print("▶ Henter domme fra Domsdatabasen...")
     domme = fetch_domsdatabasen(seen)
 
+    # ── Hent afgørelser fra Forsyningstilsynet via Google ──
+    print("▶ Henter afgørelser fra Forsyningstilsynet...")
+    fsts_afg = fetch_forsyningstilsynet_afgorelser(seen)
+
     # ── Hent konkurrentartikler ──
     print(f"▶ Henter artikler fra {len(KONKURRENT_SOURCES)} konkurrenter...")
     konkurrenter = fetch_konkurrenter(seen)
@@ -1595,6 +1678,8 @@ if __name__ == "__main__":
         news_by_source["ft"] = lovforslag
     if domme:
         news_by_source["doms"] = domme
+    if fsts_afg:
+        news_by_source["fsts_afg"] = fsts_afg
     if konkurrenter:
         news_by_source["konkurrenter"] = konkurrenter
 
