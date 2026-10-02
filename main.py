@@ -179,7 +179,7 @@ KONKURRENT_SOURCES = [
     {
         "id":   "hortendahl",
         "navn": "HortenDahl",
-        "url":  "https://www.hortendahl.dk/viden/nyheder",
+        "url":  "https://www.hortendahl.dk/nyheder-artikler/",
         "type": "html_generic",
     },
     {
@@ -191,7 +191,7 @@ KONKURRENT_SOURCES = [
     {
         "id":   "cedra",
         "navn": "CEDRA",
-        "url":  "https://cedra.dk/viden/",
+        "url":  "https://cedra.dk/",  # Forsiden — /viden/ giver 404
         "type": "html_generic",
     },
 ]
