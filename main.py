@@ -18,16 +18,15 @@ CLIENT_ID         = os.environ.get("CLIENT_ID", "").strip()
 CLIENT_SECRET     = os.environ.get("CLIENT_SECRET", "").strip()
 SENDER_UPN        = os.environ.get("SENDER_UPN", "").strip()
 RECIPIENT_1       = os.environ.get("RECIPIENT_1", "").strip()
-RECIPIENT_2       = os.environ.get("RECIPIENT_2", "").strip()
 RECIPIENT_3       = os.environ.get("RECIPIENT_3", "").strip()
 RECIPIENT_4       = os.environ.get("RECIPIENT_4", "").strip()
 RECIPIENT_5       = os.environ.get("RECIPIENT_5", "").strip()
 RECIPIENT_6       = os.environ.get("RECIPIENT_6", "").strip()
-RECIPIENT_7       = os.environ.get("RECIPIENT_7", "").strip()
-# Alle modtagere samlet — tilføj nye ved at sætte GitHub Secret + tilføje til listen
+# Alle modtagere — tilføj nye ved at sætte GitHub Secret + tilføje til listen
+# RECIPIENT_2 (le@) og RECIPIENT_7 (amp@) er fjernet — stoppet på kontoret
 RECIPIENTS = [r for r in [
-    RECIPIENT_1, RECIPIENT_2, RECIPIENT_3, RECIPIENT_4,
-    RECIPIENT_5, RECIPIENT_6, RECIPIENT_7,
+    RECIPIENT_1, RECIPIENT_3, RECIPIENT_4,
+    RECIPIENT_5, RECIPIENT_6,
 ] if r]
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 
@@ -149,6 +148,62 @@ FT_UDELUK_EMNEORD = {
     "daginstitution", "børnepasning", "folkehøjskole",
     "solarier", "tatovering", "tobak", "alkohol",
     "spil", "lotteri", "dyrevelfærd",
+}
+
+# ─────────────────────────────────────────────
+# KONKURRENTER — FAGLIGE ARTIKLER OG PUBLIKATIONER
+# ─────────────────────────────────────────────
+SECTION_KONKURRENTER = "#2C3E50"   # Mørkegrå — neutral for konkurrenter
+
+KONKURRENT_SOURCES = [
+    {
+        "id":   "energiogmiljo",
+        "navn": "Energi & Miljø",
+        "url":  "https://energiogmiljo.dk/viden/",
+        "type": "html_wordpress",
+    },
+    {
+        "id":   "bechbruun",
+        "navn": "Bech-Bruun",
+        "url":  "https://bechbruun.com/insights/news-and-cases/",
+        "type": "html_bechbruun",
+    },
+    {
+        "id":   "kromann",
+        "navn": "Kromann Reumert",
+        "url":  "https://kromannreumert.com/nyheder",
+        "type": "html_kromann",
+    },
+    {
+        "id":   "hortendahl",
+        "navn": "HortenDahl",
+        "url":  "https://www.hortendahl.dk/viden/nyheder",
+        "type": "html_generic",
+    },
+    {
+        "id":   "ey",
+        "navn": "EY",
+        "url":  "https://www.ey.com/da_dk/industries/energy-resources",
+        "type": "html_generic",
+    },
+    {
+        "id":   "cedra",
+        "navn": "CEDRA",
+        "url":  "https://cedra.dk/viden/",
+        "type": "html_generic",
+    },
+]
+
+# Emneord til forfiltrering af konkurrentnyheder
+KONKURRENT_RELEVANTE_EMNEORD = {
+    "energi", "forsyning", "fjernvarme", "elforsyning", "gasforsyning",
+    "vedvarende", "havvind", "vindmølle", "solcelle", "biogas",
+    "klima", "klimaforandring", "miljø", "miljøret", "naturbeskyttelse",
+    "forsyningstilsynet", "energistyrelsen", "energiklagenævnet",
+    "spildevand", "drikkevand", "vandforsyning", "affald",
+    "beredskab", "forsyningssikkerhed", "elnet", "varmeforsyning",
+    "regulering", "bekendtgørelse", "lovforslag", "høring",
+    "co2", "drivhusgas", "afgift", "energiafgift",
 }
 
 # ─────────────────────────────────────────────
@@ -697,6 +752,168 @@ def fetch_domsdatabasen(seen):
 
 
 # ─────────────────────────────────────────────
+# KONKURRENTER — SCRAPING AF FAGLIGE ARTIKLER
+# ─────────────────────────────────────────────
+
+def _scrape_wordpress_nyheder(url, navn, cutoff):
+    """WordPress-sites (Energi & Miljø) — h3 > a med dato som tekst."""
+    r = requests.get(url, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
+    if r.status_code != 200:
+        print(f"  ⚠️  {navn}: HTTP {r.status_code}")
+        return []
+    soup = BeautifulSoup(r.text, "html.parser")
+    items = []
+    for h3 in soup.find_all("h3"):
+        a = h3.find("a", href=True)
+        if not a:
+            continue
+        titel = a.get_text(strip=True)
+        url_art = a["href"]
+        if not url_art.startswith("http"):
+            from urllib.parse import urlparse
+            p = urlparse(url)
+            url_art = f"{p.scheme}://{p.netloc}{url_art}"
+        # Dato: søg i forælder eller naboelementet
+        dato = None
+        parent = h3.find_parent(["div", "article", "li"])
+        if parent:
+            dato_m = re.search(r"(\d{1,2})\.\s*(januar|februar|marts|april|maj|juni|juli|august|september|oktober|november|december)\s+(\d{4})", parent.get_text())
+            if dato_m:
+                dato = _parse_danish_date(dato_m.group(0))
+        if dato and dato < cutoff:
+            continue
+        items.append({"titel": titel, "url": url_art, "dato": dato})
+    return items
+
+
+def _scrape_bechbruun(url, navn, cutoff):
+    """Bech-Bruun — h3 > a med type og dato som tekst foran."""
+    r = requests.get(url, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
+    if r.status_code != 200:
+        print(f"  ⚠️  {navn}: HTTP {r.status_code}")
+        return []
+    soup = BeautifulSoup(r.text, "html.parser")
+    items = []
+    for h3 in soup.find_all("h3"):
+        a = h3.find("a", href=True)
+        if not a:
+            continue
+        titel = a.get_text(strip=True)
+        url_art = a["href"]
+        if not url_art.startswith("http"):
+            url_art = "https://bechbruun.com" + url_art
+        # Dato: søg i omgivende tekst
+        parent = h3.find_parent(["li", "div", "article"])
+        dato = None
+        if parent:
+            tekst = parent.get_text()
+            dato_m = re.search(r"(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})", tekst)
+            if dato_m:
+                MAANEDER_EN = {"January":1,"February":2,"March":3,"April":4,"May":5,
+                    "June":6,"July":7,"August":8,"September":9,"October":10,
+                    "November":11,"December":12}
+                from datetime import datetime, timezone
+                try:
+                    dato = datetime(int(dato_m.group(3)),
+                        MAANEDER_EN[dato_m.group(2)],
+                        int(dato_m.group(1)), tzinfo=timezone.utc)
+                except ValueError:
+                    pass
+        if dato and dato < cutoff:
+            continue
+        items.append({"titel": titel, "url": url_art, "dato": dato})
+    return items
+
+
+def _scrape_generic(url, navn, cutoff):
+    """Generisk scraping — h2/h3 > a med datoparser."""
+    try:
+        r = requests.get(url, headers=SCRAPE_HEADERS, timeout=TIMEOUT)
+        if r.status_code != 200:
+            print(f"  ⚠️  {navn}: HTTP {r.status_code}")
+            return []
+        soup = BeautifulSoup(r.text, "html.parser")
+        items = []
+        seen = set()
+        for tag in soup.find_all(["h2", "h3"]):
+            a = tag.find("a", href=True)
+            if not a:
+                continue
+            titel = a.get_text(strip=True)
+            url_art = a["href"]
+            if not url_art.startswith("http"):
+                from urllib.parse import urlparse
+                p = urlparse(url)
+                url_art = f"{p.scheme}://{p.netloc}{url_art}"
+            if url_art in seen or len(titel) < 10:
+                continue
+            seen.add(url_art)
+            parent = tag.find_parent(["li", "div", "article"])
+            dato = None
+            if parent:
+                dato_m = re.search(
+                    r"(\d{1,2})\.\s*(januar|februar|marts|april|maj|juni|juli|august|september|oktober|november|december)\s+(\d{4})",
+                    parent.get_text(), re.IGNORECASE
+                )
+                if dato_m:
+                    dato = _parse_danish_date(dato_m.group(0))
+            if dato and dato < cutoff:
+                continue
+            items.append({"titel": titel, "url": url_art, "dato": dato})
+        return items
+    except Exception as e:
+        print(f"  ⚠️  {navn}: {type(e).__name__}: {e}")
+        return []
+
+
+def fetch_konkurrenter(seen):
+    """
+    Scraper faglige artikler fra konkurrenternes hjemmesider.
+    Filtrerer på energi/forsyning/miljø-relevante emneord.
+    Returnerer liste af dicts klar til visning i konkurrentboks.
+    """
+    from datetime import datetime, timezone, timedelta
+    cutoff = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    alle = []
+    seen_urls = set()
+
+    for source in KONKURRENT_SOURCES:
+        try:
+            if source["type"] == "html_wordpress":
+                items = _scrape_wordpress_nyheder(source["url"], source["navn"], cutoff)
+            elif source["type"] == "html_bechbruun":
+                items = _scrape_bechbruun(source["url"], source["navn"], cutoff)
+            else:
+                items = _scrape_generic(source["url"], source["navn"], cutoff)
+
+            print(f"  → {source['navn']}: {len(items)} artikler fundet")
+
+            for it in items:
+                url_art = it["url"]
+                if url_art in seen or url_art in seen_urls:
+                    continue
+                # Emnefilter
+                if not any(re.search(r"\b" + re.escape(o) + r"\w*", it["titel"].lower())
+                           for o in KONKURRENT_RELEVANTE_EMNEORD):
+                    continue
+                seen_urls.add(url_art)
+                alle.append({
+                    "kilde_id":  source["id"],
+                    "navn":      source["navn"],
+                    "titel":     it["titel"],
+                    "url":       url_art,
+                    "dato":      it.get("dato"),
+                    "kategori":  "Konkurrenter",
+                    "farve":     SECTION_KONKURRENTER,
+                })
+        except Exception as e:
+            print(f"  ⚠️  {source['navn']}: {type(e).__name__}: {e}")
+
+    print(f"  → Konkurrenter total: {len(alle)} relevante artikler")
+    return alle
+
+
+# ─────────────────────────────────────────────
 # NYHEDSSIDER — HTML-SCRAPING
 # ─────────────────────────────────────────────
 
@@ -1225,6 +1442,16 @@ def build_html(news_by_source, hearings):
     total_nyheder  = sum(len(v) for v in news_by_source.values())
     total_horinger = len(hearings)
 
+    # Konkurrentboks — separat sektion efter hovedindhold
+    konkurrenter_items = news_by_source.get("konkurrenter", [])
+    if konkurrenter_items:
+        blokke = "".join(_item_html(it, SECTION_KONKURRENTER) for it in konkurrenter_items)
+        sektioner_html += _sektion_html(
+            f"Nyt fra branchen ({len(konkurrenter_items)})",
+            SECTION_KONKURRENTER,
+            blokke
+        )
+
     if not sektioner_html:
         sektioner_html = """
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -1296,7 +1523,7 @@ def build_html(news_by_source, hearings):
             <p style="margin:0;font-size:11px;color:#999;text-align:center;">
               Hulgaard Advokater P/S · Energi &amp; Forsyning ·
               Automatisk genereret {dato_str} ·
-              Kilder: KEFM, Energinet, Miljøministeriet, Green Power Denmark, Dansk Fjernvarme, EU-Kommissionen, Høringsportalen, Folketinget, Domsdatabasen
+              Kilder: KEFM, Energinet, Miljøministeriet, Green Power Denmark, Dansk Fjernvarme, EU-Kommissionen, Høringsportalen, Folketinget, Domsdatabasen · Branchen: Energi &amp; Miljø, Bech-Bruun, Kromann Reumert, HortenDahl, EY, CEDRA
             </p>
           </td>
         </tr>
@@ -1324,7 +1551,6 @@ if __name__ == "__main__":
             "CLIENT_SECRET": CLIENT_SECRET,
             "SENDER_UPN":    SENDER_UPN,
             "RECIPIENT_1":   RECIPIENT_1,
-            "RECIPIENT_2":   RECIPIENT_2,
         }.items() if not v
     ]
     if not RECIPIENTS:
@@ -1352,6 +1578,10 @@ if __name__ == "__main__":
     print("▶ Henter domme fra Domsdatabasen...")
     domme = fetch_domsdatabasen(seen)
 
+    # ── Hent konkurrentartikler ──
+    print(f"▶ Henter artikler fra {len(KONKURRENT_SOURCES)} konkurrenter...")
+    konkurrenter = fetch_konkurrenter(seen)
+
     # ── Hent nyheder fra nyhedskilder (KEFM RSS) ──
     news_by_source = {}
     for source in NEWS_SOURCES:
@@ -1360,11 +1590,13 @@ if __name__ == "__main__":
         if items:
             news_by_source[source["id"]] = items
 
-    # Tilføj lovforslag og domme som egne kilder
+    # Tilføj lovforslag, domme og konkurrenter som egne kilder
     if lovforslag:
         news_by_source["ft"] = lovforslag
     if domme:
         news_by_source["doms"] = domme
+    if konkurrenter:
+        news_by_source["konkurrenter"] = konkurrenter
 
     # ── AI-klassificering: nyheder (kategori + beskrivelse + bemærkninger) ──
     if ANTHROPIC_API_KEY:
