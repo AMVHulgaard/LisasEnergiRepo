@@ -259,45 +259,51 @@ SCRAPE_HEADERS = {
 
 def load_state():
     """
-    Returnerer set af høring-URLs vi allerede har vist.
-    Nyhedssider dedupes udelukkende via datofilteret (LOOKBACK_DAYS).
-    Høringer har intet datofilter der forhindrer gentagelse, så de huskes.
+    Returnerer tuple (seen, historik):
+    - seen: set af høring/lovforslag-URLs der allerede er vist
+    - historik: dict { url: [{"dato": "...", "titel": "..."}] }
+      bruges til at vise tidligere omtaler under et element i mailen
     """
     try:
         with open(STATE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-            return set(data.get("horinger_sete", []))
+            seen     = set(data.get("horinger_sete", []))
+            historik = data.get("historik", {})
+            return seen, historik
     except FileNotFoundError:
         print("  ℹ️  state.json ikke fundet — første kørsel")
-        return set()
+        return set(), {}
     except Exception as e:
         print(f"  ⚠️  Kunne ikke læse state.json: {e}")
-        return set()
+        return set(), {}
 
 
-def save_state(horinger_sete):
+def save_state(horinger_sete, historik):
     """
-    Gemmer kun høring-URLs til state.json.
-    Rydder automatisk op: fjerner høringer ældre end 60 dage
-    (baseret på URL-mønsteret eller blot at vi beholder en rullende liste
-    på maks 500 poster så filen ikke vokser ubegrænset).
+    Gemmer høring-URLs og historik til state.json.
+    Historik: dict { url: [{"dato": "YYYY-MM-DD", "titel": "..."}] }
+    Maks 500 høring-URLs og 200 historik-poster (FIFO).
     """
-    # Behold maks 500 seneste poster (FIFO)
     sorteret = sorted(horinger_sete)
     if len(sorteret) > 500:
         sorteret = sorteret[-500:]
+
+    # Begræns historik til 200 URLs
+    if len(historik) > 200:
+        historik = dict(list(historik.items())[-200:])
 
     try:
         with open(STATE_FILE, "w", encoding="utf-8") as f:
             json.dump(
                 {
                     "horinger_sete": sorteret,
+                    "historik":      historik,
                     "last_updated":  datetime.now(timezone.utc).isoformat(),
-                    "_note": "Kun høring-URLs gemmes. Nyhedssider dedupes via LOOKBACK_DAYS.",
+                    "_note": "høring-URLs + historik for lovforslag og høringer.",
                 },
                 f, indent=2, ensure_ascii=False,
             )
-        print(f"  ✅ state.json gemt ({len(sorteret)} høringer husket)")
+        print(f"  ✅ state.json gemt ({len(sorteret)} sete, {len(historik)} historik-poster)")
     except Exception as e:
         print(f"  ⚠️  Kunne ikke gemme state.json: {e}")
 
@@ -1463,10 +1469,10 @@ def _format_dato(dato):
     return f"{dato.day}. {MAANEDER[dato.month]} {dato.year}"
 
 
-def _item_html(item, farve):
-    """Returnerer HTML-blok for ét element (nyhed eller høring) med Lisas format."""
-    dato_str    = _format_dato(item.get("dato"))
-    kilde_navn  = item.get("navn", item.get("myndighed", ""))
+def _item_html(item, farve, historik=None):
+    """Returnerer HTML-blok for ét element (nyhed eller høring) med Lisas format.
+    historik: dict { url: [{"dato": "...", "titel": "..."}] } — vises som statisk liste.
+    """
     beskrivelse = item.get("beskrivelse", "")
     bemærkninger = item.get("bemærkninger", "")
     frist       = item.get("frist", "")
@@ -1502,6 +1508,23 @@ def _item_html(item, farve):
         if bem_tekst else ""
     )
 
+    # Historik — vis tidligere omtaler som statisk liste
+    url = item.get("url", "")
+    historik_html = ""
+    if historik and url in historik and len(historik[url]) > 1:
+        tidligere = historik[url][:-1]  # alle undtagen den nyeste
+        rækker = "".join(
+            f'<tr><td style="padding:1px 0;font-size:11px;color:#888;">'
+            f'{p["dato"]} — {p.get("status") or p["titel"][:80]}'
+            f'</td></tr>'
+            for p in reversed(tidligere)
+        )
+        historik_html = f"""<table width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="margin-top:6px;border-top:1px solid #ddd;">
+  <tr><td style="padding:4px 0 2px 0;font-size:11px;color:#aaa;"><strong>Tidligere omtalt:</strong></td></tr>
+  {rækker}
+</table>"""
+
     return f"""
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="margin-bottom:10px;border-left:3px solid {farve};
@@ -1510,12 +1533,13 @@ def _item_html(item, farve):
     <td style="padding:10px 14px;">
       {meta_html}
       <p style="margin:0;font-size:14px;font-weight:bold;">
-        <a href="{item['url']}" style="color:{BRAND_DARK};text-decoration:none;">
+        <a href="{url}" style="color:{BRAND_DARK};text-decoration:none;">
           {item['titel']}
         </a>
       </p>
       {besk_html}
       {bem_html}
+      {historik_html}
     </td>
   </tr>
 </table>"""
@@ -1544,13 +1568,15 @@ def _sektion_html(overskrift, farve, indhold_html):
 </table>"""
 
 
-def build_html(news_by_source, hearings):
+def build_html(news_by_source, hearings, historik=None):
     """
     Bygger den fulde HTML-e-mail grupperet i Lisas 6 kategorier.
     news_by_source: dict  kilde_id → liste af nyheds-dicts (med "kategori"-felt)
     hearings:       liste af høring-dicts (placeres i "Høringer")
+    historik:       dict  url → liste af tidligere omtaler
     """
-    now      = datetime.now(timezone.utc)
+    if historik is None:
+        historik = {}
     dato_str = _format_dato(now)
 
     # Saml alle elementer i én liste og tilføj høringer som "Høringer"-kategori
@@ -1584,7 +1610,7 @@ def build_html(news_by_source, hearings):
         if not items:
             continue
         farve  = KATEGORI_FARVER[kat]
-        blokke = "".join(_item_html(it, farve) for it in items)
+        blokke = "".join(_item_html(it, farve, historik) for it in items)
         sektioner_html += _sektion_html(f"{kat} ({len(items)})", farve, blokke)
 
     total_nyheder  = sum(len(v) for v in news_by_source.values())
@@ -1711,8 +1737,8 @@ if __name__ == "__main__":
 
     # ── Indlæs state ──
     print("▶ Indlæser state...")
-    seen = load_state()
-    print(f"  → {len(seen)} sete URLs")
+    seen, historik = load_state()
+    print(f"  → {len(seen)} sete URLs, {len(historik)} historik-poster")
 
     # ── Hent høringer fra Høringsportalen ──
     print(f"▶ Henter høringer fra Høringsportalen ({len(HOERINGSPORTALEN_FEEDS)} feeds)...")
@@ -1822,11 +1848,30 @@ if __name__ == "__main__":
     # Kun NYE høringer (ikke opdaterede) tilføjes til seen
     nye_hoering_urls    = {it["url"] for it in hearings if not it.get("opdateret")}
     nye_lovforslag_urls = {it["url"] for it in news_by_source.get("ft", [])}
-    save_state(seen | nye_hoering_urls | nye_lovforslag_urls)
+
+    # Opdatér historik for høringer og lovforslag
+    nu_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    for it in hearings:
+        url = it["url"]
+        post = {"dato": nu_str, "titel": it["titel"]}
+        if url not in historik:
+            historik[url] = []
+        if not any(p["dato"] == nu_str for p in historik[url]):
+            historik[url].append(post)
+    for it in news_by_source.get("ft", []):
+        url = it["url"]
+        status = it.get("bemærkninger", "")
+        post = {"dato": nu_str, "titel": it["titel"], "status": status}
+        if url not in historik:
+            historik[url] = []
+        if not any(p["dato"] == nu_str for p in historik[url]):
+            historik[url].append(post)
+
+    save_state(seen | nye_hoering_urls | nye_lovforslag_urls, historik)
 
     # ── Byg HTML ──
     print("▶ Bygger HTML-mail...")
-    subject, html = build_html(news_by_source, hearings)
+    subject, html = build_html(news_by_source, hearings, historik)
 
     # ── Hent token og send mail ──
     print("▶ Henter Microsoft Graph-token...")
