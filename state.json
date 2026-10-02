@@ -1,6 +1,9 @@
 {
   "horinger_sete": [
+    "https://hoeringsportalen.dk/Hearing/Details/71228",
+    "https://hoeringsportalen.dk/Hearing/Details/71276",
     "https://hoeringsportalen.dk/Hearing/Details/71303",
+    "https://hoeringsportalen.dk/Hearing/Details/71308",
     "https://hoeringsportalen.dk/Hearing/Details/71325",
     "https://hoeringsportalen.dk/Hearing/Details/71377",
     "https://hoeringsportalen.dk/Hearing/Details/71405",
@@ -24,9 +27,72 @@
     "https://hoeringsportalen.dk/Hearing/Details/71549",
     "https://hoeringsportalen.dk/Hearing/Details/71552",
     "https://hoeringsportalen.dk/Hearing/Details/71560",
+    "https://hoeringsportalen.dk/Hearing/Details/71562",
     "https://www.ft.dk/samling/20252/lovforslag/L23/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L93/index.htm"
   ],
-  "last_updated": "2026-09-30T06:20:08.872541+00:00",
-  "_note": "Kun høring-URLs gemmes. Nyhedssider dedupes via LOOKBACK_DAYS."
+  "historik": {
+    "https://hoeringsportalen.dk/Hearing/Details/71562": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Forslag til lov om ændring af lov om fremme af vedvarende energi (Udvidelse af salgsoptionsordningen for store solcelleanlæg og tilpasning af rammerne for VE-ordningerne)"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71546": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Bekendtgørelse om integration af vedvarende brændstoffer, der ikke er af biologisk oprindelse til endelige energiformål og ikkeenergimæssige formål i industrien."
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71537": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Høring af gasleveringsbekendtgørelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71228": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Høring af maskinstøjsbekendtgørelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71308": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Høring over udkast til bekendtgørelse om affald"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71276": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Høring af bekendtgørelse om tilskud til investering i udvalgte miljø- og klimateknologier 2026"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71560": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Høring over miljørapport vedr. ændring af CAP-planen 2023 - 2027"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71552": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Høring over udkast til Vejledning om regulering af kvælstof og fosfor 2027 samt udkast til Vejledning om anvendelse af gødning"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71527": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Høring af ændringsbekendtgørelse om indførsel af stikprøveplan for vejning af fangster af muslinger mm."
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71549": [
+      {
+        "dato": "2026-10-02",
+        "titel": "Fornyet høring af udkast til lov om ændring af lov om miljøbeskyttelse og lov om ændring af lov om jordforurening - (Implementering af dele af direktiv 2024/1785 om ændring af det gældende direktiv for industrielle emissioner (2010/75/EU)"
+      }
+    ]
+  },
+  "last_updated": "2026-10-02T08:05:17.334162+00:00",
+  "_note": "høring-URLs + historik for lovforslag og høringer."
 }
