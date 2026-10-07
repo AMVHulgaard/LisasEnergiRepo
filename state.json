@@ -1,11 +1,14 @@
 {
   "horinger_sete": [
+    "https://hoeringsportalen.dk/Hearing/Details/71074",
     "https://hoeringsportalen.dk/Hearing/Details/71228",
+    "https://hoeringsportalen.dk/Hearing/Details/71240",
     "https://hoeringsportalen.dk/Hearing/Details/71276",
     "https://hoeringsportalen.dk/Hearing/Details/71303",
     "https://hoeringsportalen.dk/Hearing/Details/71308",
     "https://hoeringsportalen.dk/Hearing/Details/71325",
     "https://hoeringsportalen.dk/Hearing/Details/71377",
+    "https://hoeringsportalen.dk/Hearing/Details/71398",
     "https://hoeringsportalen.dk/Hearing/Details/71405",
     "https://hoeringsportalen.dk/Hearing/Details/71469",
     "https://hoeringsportalen.dk/Hearing/Details/71471",
@@ -28,6 +31,9 @@
     "https://hoeringsportalen.dk/Hearing/Details/71552",
     "https://hoeringsportalen.dk/Hearing/Details/71560",
     "https://hoeringsportalen.dk/Hearing/Details/71562",
+    "https://hoeringsportalen.dk/Hearing/Details/71565",
+    "https://hoeringsportalen.dk/Hearing/Details/71574",
+    "https://hoeringsportalen.dk/Hearing/Details/71579",
     "https://www.ft.dk/samling/20252/lovforslag/L23/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L93/index.htm"
   ],
@@ -35,6 +41,10 @@
     "https://hoeringsportalen.dk/Hearing/Details/71562": [
       {
         "dato": "2026-10-02",
+        "titel": "Forslag til lov om ændring af lov om fremme af vedvarende energi (Udvidelse af salgsoptionsordningen for store solcelleanlæg og tilpasning af rammerne for VE-ordningerne)"
+      },
+      {
+        "dato": "2026-10-07",
         "titel": "Forslag til lov om ændring af lov om fremme af vedvarende energi (Udvidelse af salgsoptionsordningen for store solcelleanlæg og tilpasning af rammerne for VE-ordningerne)"
       }
     ],
@@ -54,17 +64,29 @@
       {
         "dato": "2026-10-02",
         "titel": "Høring af maskinstøjsbekendtgørelsen"
+      },
+      {
+        "dato": "2026-10-07",
+        "titel": "Høring af maskinstøjsbekendtgørelsen"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71308": [
       {
         "dato": "2026-10-02",
         "titel": "Høring over udkast til bekendtgørelse om affald"
+      },
+      {
+        "dato": "2026-10-07",
+        "titel": "Høring over udkast til bekendtgørelse om affald"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71276": [
       {
         "dato": "2026-10-02",
+        "titel": "Høring af bekendtgørelse om tilskud til investering i udvalgte miljø- og klimateknologier 2026"
+      },
+      {
+        "dato": "2026-10-07",
         "titel": "Høring af bekendtgørelse om tilskud til investering i udvalgte miljø- og klimateknologier 2026"
       }
     ],
@@ -84,6 +106,10 @@
       {
         "dato": "2026-10-02",
         "titel": "Høring af ændringsbekendtgørelse om indførsel af stikprøveplan for vejning af fangster af muslinger mm."
+      },
+      {
+        "dato": "2026-10-07",
+        "titel": "Høring af ændringsbekendtgørelse om indførsel af stikprøveplan for vejning af fangster af muslinger mm."
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71549": [
@@ -91,8 +117,44 @@
         "dato": "2026-10-02",
         "titel": "Fornyet høring af udkast til lov om ændring af lov om miljøbeskyttelse og lov om ændring af lov om jordforurening - (Implementering af dele af direktiv 2024/1785 om ændring af det gældende direktiv for industrielle emissioner (2010/75/EU)"
       }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71579": [
+      {
+        "dato": "2026-10-07",
+        "titel": "Høring over ændring af markedsmæssighedsbekendtgørelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71398": [
+      {
+        "dato": "2026-10-07",
+        "titel": "Høring over udkast til seks bekendtgørelser, herunder bekendtgørelse om prioritering af kapacitet i det kollektive elforsyningsnet"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71074": [
+      {
+        "dato": "2026-10-07",
+        "titel": "Ekstern høring af ny emballagebekendtgørelse og ny pantbekendtgørelse"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71240": [
+      {
+        "dato": "2026-10-07",
+        "titel": "Oprydningsbekendtgørelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71565": [
+      {
+        "dato": "2026-10-07",
+        "titel": "Bekendtgørelse om ansøgninger m.v. for landbrugere i Tast selv"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71574": [
+      {
+        "dato": "2026-10-07",
+        "titel": "Udkast til forslag til lov om supplerende bestemmelser til forordningen om cyberrobusthed"
+      }
     ]
   },
-  "last_updated": "2026-10-02T08:05:17.334162+00:00",
+  "last_updated": "2026-10-07T06:20:47.495155+00:00",
   "_note": "høring-URLs + historik for lovforslag og høringer."
 }
