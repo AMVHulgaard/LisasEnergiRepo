@@ -1,6 +1,8 @@
 {
   "horinger_sete": [
+    "https://hoeringsportalen.dk/Hearing/Details/70800",
     "https://hoeringsportalen.dk/Hearing/Details/71074",
+    "https://hoeringsportalen.dk/Hearing/Details/71218",
     "https://hoeringsportalen.dk/Hearing/Details/71228",
     "https://hoeringsportalen.dk/Hearing/Details/71240",
     "https://hoeringsportalen.dk/Hearing/Details/71276",
@@ -10,6 +12,8 @@
     "https://hoeringsportalen.dk/Hearing/Details/71377",
     "https://hoeringsportalen.dk/Hearing/Details/71398",
     "https://hoeringsportalen.dk/Hearing/Details/71405",
+    "https://hoeringsportalen.dk/Hearing/Details/71415",
+    "https://hoeringsportalen.dk/Hearing/Details/71451",
     "https://hoeringsportalen.dk/Hearing/Details/71469",
     "https://hoeringsportalen.dk/Hearing/Details/71471",
     "https://hoeringsportalen.dk/Hearing/Details/71474",
@@ -34,7 +38,37 @@
     "https://hoeringsportalen.dk/Hearing/Details/71565",
     "https://hoeringsportalen.dk/Hearing/Details/71574",
     "https://hoeringsportalen.dk/Hearing/Details/71579",
+    "https://hoeringsportalen.dk/Hearing/Details/71589",
+    "https://hoeringsportalen.dk/Hearing/Details/71590",
+    "https://hoeringsportalen.dk/Hearing/Details/71594",
+    "https://hoeringsportalen.dk/Hearing/Details/71596",
+    "https://hoeringsportalen.dk/Hearing/Details/71602",
+    "https://hoeringsportalen.dk/Hearing/Details/71607",
+    "https://hoeringsportalen.dk/Hearing/Details/71608",
+    "https://hoeringsportalen.dk/Hearing/Details/71610",
+    "https://hoeringsportalen.dk/Hearing/Details/71613",
+    "https://hoeringsportalen.dk/Hearing/Details/71615",
+    "https://hoeringsportalen.dk/Hearing/Details/71616",
+    "https://hoeringsportalen.dk/Hearing/Details/71617",
+    "https://hoeringsportalen.dk/Hearing/Details/71618",
+    "https://hoeringsportalen.dk/Hearing/Details/71627",
+    "https://hoeringsportalen.dk/Hearing/Details/71628",
+    "https://hoeringsportalen.dk/Hearing/Details/71634",
+    "https://hoeringsportalen.dk/Hearing/Details/71635",
+    "https://hoeringsportalen.dk/Hearing/Details/71638",
+    "https://hoeringsportalen.dk/Hearing/Details/71639",
+    "https://www.ft.dk/samling/20252/lovforslag/L12/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L13/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L14/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L15/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L17/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L18/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L22/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L23/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L33/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L69/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L70/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L75/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L93/index.htm"
   ],
   "historik": {
@@ -94,6 +128,10 @@
       {
         "dato": "2026-10-02",
         "titel": "Høring over miljørapport vedr. ændring af CAP-planen 2023 - 2027"
+      },
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring over miljørapport vedr. ændring af CAP-planen 2023 - 2027"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71552": [
@@ -146,6 +184,10 @@
       {
         "dato": "2026-10-07",
         "titel": "Bekendtgørelse om ansøgninger m.v. for landbrugere i Tast selv"
+      },
+      {
+        "dato": "2026-10-14",
+        "titel": "Bekendtgørelse om ansøgninger m.v. for landbrugere i Tast selv"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71574": [
@@ -153,8 +195,223 @@
         "dato": "2026-10-07",
         "titel": "Udkast til forslag til lov om supplerende bestemmelser til forordningen om cyberrobusthed"
       }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71628": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring af tre bekendtgørelsesudkast der fastsætter bestemmelser om vurdering af overkompensation i de gældende støttebekendtgørelser til biogas"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71616": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring af bekendtgørelse om elhandelsvirksomheders opgaver og forpligtelser i forbindelse med levering af elektricitet til elkunder"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71613": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring af ændring af bekendtgørelse om obligatoriske energiledelsessystemer og energisyn og klimasyn i visse virksomheder"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71589": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring af to bekendtgørelser, der gennemfører dele af gasdirektivet"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71415": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Fornyet høring - Forslag til lov om ændring af lov om gasforsyning"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71634": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring om udkast til godkendelsesbkg., standardvilkårsbkg., affaldsforbrændingsbkg., bkg. om store fyr, VOC-bkg., forældelsesbkg., titandioxidbkg. og MCP bkg."
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71617": [
+      {
+        "dato": "2026-10-14",
+        "titel": "."
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71618": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring over bekendtgørelse om tilskud til maritim viden til styrkelse af overvågningsindsatsen af bundfauna og havpattedyr"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71610": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring over bekendtgørelse om tilskud til ophugning af visse fiskefartøjer"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71608": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Biocidaktivstoffer: Høring om foreløbige forslag til Kommissions gennemførelsesforordninger om godkendelse, fornyet godkendelse, ikke-godkendelse og administrativ forlængelse, jf. Europa-Parlamentets og Rådets forordning (EU) nr. 528/2012 om tilgængeliggørelse på markedet og anvendelse af biocidholdige produkter."
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71590": [
+      {
+        "dato": "2026-10-14",
+        "titel": "REACH-godkendelser: Høring om foreløbige forslag til Kommissionens gennemførelsesforordninger om godkendelse, fornyet godkendelse eller afvisning af anvendelser af særligt problematiske stoffer på bilag XIV, jf. Europa-Parlamentets og Rådets forordning (EF) nr. 1907/2006 om registrering, vurdering og godkendelse af samt begrænsninger for kemikalier (REACH)"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71639": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Økologibekendtgørelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71638": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Økologibekendtgørelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71635": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Bekendtgørelse om etableringsstøtte til unge landbrugere 2027"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71627": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Konditionalitetsbekendtgørelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71615": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Bekendtgørelse om betaling for kontrol med gødning og jordforbedringsmidler m.v."
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71607": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring af afgrænsningsnotat for miljøvurdering af vandområdeplanerne 2027-2033"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71218": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring af udkast til lov om ændring af husdyrbrugloven (Gennemførelse af direktiv om ændring af direktiv om industrielle emissioner)"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71594": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Supplerende høring over ændringer til udkast til bekendtgørelse om udledningsbaseret markregulering for 2027, udkast til bekendtgørelse om udlednings- og gødningsregnskab m.v. for 2027 og udkast til bekendtgørelse om virksomheders anvendelse af gødning og dyrkningsrelaterede tiltag"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71596": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring over udkast til bekendtgørelse om gennemførelse af bygge- og anlægsprojekt i forbindelse med etablering af faciliteter til Hærens tunge brigade på Aalborg Kaserne"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71451": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Høring over udkast til bekendtgørelse om gennemførelse af bygge- og anlægsprojekt i forbindelse med etablering af indkvarteringsfaciliteter m.v. på Marinestation Kongsøre"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71602": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Bekendtgørelse om fælles forvaltning af fiskeri i Flensborg Inderfjord"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/70800": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Lov om ændring af lov om miljøbeskyttelse og lov om forurenet jord (Styrkelse af strafniveauer for ulovlig flytning og anvendelse af forurenet jord, for manglende efterlevelse af regler om bygge- og anlægsaffald og for visse andre regler i lov om miljøbeskyttelse og lov om forurenet jord)"
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L18/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om offentlige veje m.v., jernbaneloven og forskellige andre love. (Lempeligere kriterier for borgeres mulighed for fremrykket overtagelse og ekspropriation, konsekvensændringer som følge af ny ekspropriationsproceslov m.v.).",
+        "status": "Genfremsættelse af tidligere lovforslag. Ikrafttrædelsesdato: 1. januar 2027."
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L17/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til ekspropriationsprocesloven.",
+        "status": "Forslaget er en genfremsættelse af tidligere lovforslag, der bortfaldt ved folketingsvalget i marts 2026. Ikrafttrædelsesdato fremgår ikke eksplicit af uddraget."
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L75/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om fastsættelse af udgiftslofter for stat, kommuner og regioner for finansåret 2026, lov om fastsættelse af udgiftslofter for stat, kommuner og regioner for finansåret 2027, lov om fastsættelse af udgiftslofter for stat, kommuner og regioner for finansåret 2028 og lov om fastsættelse af udgiftslofter for stat, kommuner og regioner for finansåret 2029.(Forhøjelse af de planlagte udgiftsrammer som følge af »DK2035 – Et stærkt Danmark i en usikker verden«, forslag til finanslov for 2027 m.v.).",
+        "status": "Status: Lovforslag fremsat for Folketinget. Konkret høringsfrist og ikrafttrædelsesdato fremgår ikke af titlen eller uddraget."
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L70/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om miljøbeskyttelse og lov om vandforsyning m.v. (Beredskab i vandsektoren).",
+        "status": "Ikrafttrædelsesdato: 1. januar 2027"
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L33/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om husdyrbrug og anvendelse af gødning m.v. (Gennemførelse af direktiv om ændring af direktiv om industrielle emissioner på husdyrbrugområdet).",
+        "status": "Ikrafttrædelsesdato: 1. januar 2027"
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L69/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om miljøbeskyttelse og lov om forurenet jord. (Skærpelse af strafniveauer for overtrædelse af regler i lov om miljøbeskyttelse, bortset fra regler om miljøzoner og nulemissionszoner, og af regler i lov om forurenet jord).",
+        "status": ""
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L22/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om planlægning, lov om naturbeskyttelse, byggeloven og lov om husdyrbrug og anvendelse af gødning m.v. (Bedre udviklingsmuligheder for landdistrikterne og skærpede krav om klimatilpasning m.v.).",
+        "status": ""
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L15/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om reduktion af drivhusgasser fra transportsektoren m.v. (Bemyndigelse til at fastsætte nærmere regler om administrative bødeforelæg).",
+        "status": ""
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L14/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om gasforsyning. (Gennemførelse af EU’s brint- og gasmarkedspakke).",
+        "status": ""
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L13/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om anvendelse af Danmarks undergrund og lov om kontinentalsoklen og visse aktiviteter på søterritoriet. (Afvikling og genanvendelse af anlæg, installationer, boringer og brønde m.v. på undergrundsområdet, udvidelse af tilladelsesordningen for rørledninger på dansk kontinentalsokkelområde og søterritorium m.v.).",
+        "status": ""
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L12/index.htm": [
+      {
+        "dato": "2026-10-14",
+        "titel": "Forslag til lov om ændring af lov om fremme af vedvarende energi, lov om elforsyning og lov om styrket beredskab i energisektoren. (Elproduktionsanlæg på havet med tilslutning til udlandet, m.v.).",
+        "status": ""
+      }
     ]
   },
-  "last_updated": "2026-10-07T06:20:47.495155+00:00",
+  "last_updated": "2026-10-14T06:30:00.184872+00:00",
   "_note": "høring-URLs + historik for lovforslag og høringer."
 }
