@@ -3,6 +3,7 @@
     "https://hoeringsportalen.dk/Hearing/Details/70800",
     "https://hoeringsportalen.dk/Hearing/Details/71074",
     "https://hoeringsportalen.dk/Hearing/Details/71218",
+    "https://hoeringsportalen.dk/Hearing/Details/71227",
     "https://hoeringsportalen.dk/Hearing/Details/71228",
     "https://hoeringsportalen.dk/Hearing/Details/71240",
     "https://hoeringsportalen.dk/Hearing/Details/71276",
@@ -57,6 +58,13 @@
     "https://hoeringsportalen.dk/Hearing/Details/71635",
     "https://hoeringsportalen.dk/Hearing/Details/71638",
     "https://hoeringsportalen.dk/Hearing/Details/71639",
+    "https://hoeringsportalen.dk/Hearing/Details/71645",
+    "https://hoeringsportalen.dk/Hearing/Details/71646",
+    "https://hoeringsportalen.dk/Hearing/Details/71647",
+    "https://hoeringsportalen.dk/Hearing/Details/71650",
+    "https://hoeringsportalen.dk/Hearing/Details/71653",
+    "https://hoeringsportalen.dk/Hearing/Details/71656",
+    "https://hoeringsportalen.dk/Hearing/Details/71657",
     "https://www.ft.dk/samling/20252/lovforslag/L12/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L13/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L14/index.htm",
@@ -66,8 +74,11 @@
     "https://www.ft.dk/samling/20252/lovforslag/L22/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L23/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L33/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L67/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L69/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L7/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L70/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L71/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L75/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L93/index.htm"
   ],
@@ -166,6 +177,10 @@
       {
         "dato": "2026-10-07",
         "titel": "Høring over udkast til seks bekendtgørelser, herunder bekendtgørelse om prioritering af kapacitet i det kollektive elforsyningsnet"
+      },
+      {
+        "dato": "2026-10-21",
+        "titel": "Høring over udkast til seks bekendtgørelser, herunder bekendtgørelse om prioritering af kapacitet i det kollektive elforsyningsnet"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71074": [
@@ -230,6 +245,10 @@
       {
         "dato": "2026-10-14",
         "titel": "Høring om udkast til godkendelsesbkg., standardvilkårsbkg., affaldsforbrændingsbkg., bkg. om store fyr, VOC-bkg., forældelsesbkg., titandioxidbkg. og MCP bkg."
+      },
+      {
+        "dato": "2026-10-21",
+        "titel": "Høring om udkast til godkendelsesbkg., standardvilkårsbkg., affaldsforbrændingsbkg., bkg. om store fyr, VOC-bkg., forældelsesbkg., titandioxidbkg. og MCP bkg."
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71617": [
@@ -241,6 +260,10 @@
     "https://hoeringsportalen.dk/Hearing/Details/71618": [
       {
         "dato": "2026-10-14",
+        "titel": "Høring over bekendtgørelse om tilskud til maritim viden til styrkelse af overvågningsindsatsen af bundfauna og havpattedyr"
+      },
+      {
+        "dato": "2026-10-21",
         "titel": "Høring over bekendtgørelse om tilskud til maritim viden til styrkelse af overvågningsindsatsen af bundfauna og havpattedyr"
       }
     ],
@@ -410,8 +433,77 @@
         "titel": "Forslag til lov om ændring af lov om fremme af vedvarende energi, lov om elforsyning og lov om styrket beredskab i energisektoren. (Elproduktionsanlæg på havet med tilslutning til udlandet, m.v.).",
         "status": ""
       }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71653": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Høring af udkast til bekendtgørelse om reduktion af drivhusgasser fra transportsektoren m.v. og bæredygtighed"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71650": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Høring over udkast til otte bekendtgørelser om betaling for myndighedsbehandling i Forsyningstilsynet"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71646": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Høring over udkast til fem bekendtgørelse om indtægtsrammer og reguleringsregnskaber vedrørende Energinets el- og gasaktiviteter"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71227": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Høring af udkast til Risikovurdering af tilstrømningsområder for indvindingssteder af drikkevand"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71657": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Bekendtgørelse om tilskud til bioordninger for 2027"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71656": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Bekendtgørelse om slagtepræmie"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71647": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Bekendtgørelse om tilskud til pleje af græs- og naturarealer"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71645": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Grundbetalingsbekendtgørelsen for 2027"
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L71/index.htm": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Forslag til lov om ændring af lov om forsvarets formål, opgaver og organisation m.v. (Forsvarets rådighed over ejendom tilhørende enhver samt fortrolighed i forbindelse med undersøgelser af havarier m.v.).",
+        "status": ""
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L67/index.htm": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Forslag til lov om ændring af lov om arbejdsmiljø og lov om kemikalier. (Nedlæggelse af Produktregisteret).",
+        "status": "Forslået ikrafttrædelse: 1. januar 2027."
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L7/index.htm": [
+      {
+        "dato": "2026-10-21",
+        "titel": "Forslag til lov om ændring af årsregnskabsloven, lov om uafhængige erklæringsudbydere vedrørende bæredygtighedsrapportering, selskabsloven og revisorloven. (Gennemførelse af EU-direktiv om forenkling af krav til virksomheders bæredygtighedsrapportering).",
+        "status": ""
+      }
     ]
   },
-  "last_updated": "2026-10-14T06:30:00.184872+00:00",
+  "last_updated": "2026-10-21T06:26:12.990774+00:00",
   "_note": "høring-URLs + historik for lovforslag og høringer."
 }
