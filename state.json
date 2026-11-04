@@ -1,6 +1,7 @@
 {
   "horinger_sete": [
     "https://hoeringsportalen.dk/Hearing/Details/70531",
+    "https://hoeringsportalen.dk/Hearing/Details/70776",
     "https://hoeringsportalen.dk/Hearing/Details/70800",
     "https://hoeringsportalen.dk/Hearing/Details/71074",
     "https://hoeringsportalen.dk/Hearing/Details/71218",
@@ -15,6 +16,7 @@
     "https://hoeringsportalen.dk/Hearing/Details/71398",
     "https://hoeringsportalen.dk/Hearing/Details/71405",
     "https://hoeringsportalen.dk/Hearing/Details/71415",
+    "https://hoeringsportalen.dk/Hearing/Details/71439",
     "https://hoeringsportalen.dk/Hearing/Details/71451",
     "https://hoeringsportalen.dk/Hearing/Details/71469",
     "https://hoeringsportalen.dk/Hearing/Details/71471",
@@ -74,6 +76,18 @@
     "https://hoeringsportalen.dk/Hearing/Details/71704",
     "https://hoeringsportalen.dk/Hearing/Details/71707",
     "https://hoeringsportalen.dk/Hearing/Details/71709",
+    "https://hoeringsportalen.dk/Hearing/Details/71716",
+    "https://hoeringsportalen.dk/Hearing/Details/71722",
+    "https://hoeringsportalen.dk/Hearing/Details/71725",
+    "https://hoeringsportalen.dk/Hearing/Details/71726",
+    "https://hoeringsportalen.dk/Hearing/Details/71734",
+    "https://hoeringsportalen.dk/Hearing/Details/71744",
+    "https://hoeringsportalen.dk/Hearing/Details/71748",
+    "https://hoeringsportalen.dk/Hearing/Details/71751",
+    "https://hoeringsportalen.dk/Hearing/Details/71754",
+    "https://hoeringsportalen.dk/Hearing/Details/71755",
+    "https://hoeringsportalen.dk/Hearing/Details/71756",
+    "https://hoeringsportalen.dk/Hearing/Details/71757",
     "https://www.ft.dk/samling/20252/lovforslag/L12/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L13/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L14/index.htm",
@@ -585,8 +599,92 @@
         "dato": "2026-10-28",
         "titel": "Udkast til bekendtgørelse om rekreativt fiskeri i saltvand og ferskvand samt redskabsfiskeri m.v. i ferskvand vedr. pris- og lønregulering af fisketegnspriserne"
       }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71754": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Høring af forslag til bekendtgørelse om CO2-lagringspilot- og demonstrationsprojekter"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71755": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Lovforslag vedrørende rammer for kulstoflagring i biokul og formkrav til lovbundne støtteordninger"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71756": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Ophævelse af overgangsbestemmelse i bekendtgørelse om affaldsvarmeprisloftet"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71757": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Aktivstoffer i plantebeskyttelsesmidler: Høring om forslag til Kommissionens gennemførelsesforordninger om godkendelse, fornyelse, ikke-godkendelse, ikke-fornyelse eller administrativ forlængelse af aktivstoffer i plantebeskyttelsesmidler"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71716": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Høring over udkast til emballagebekendtgørelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/70776": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Offentlig høring af Projektbeskrivelse og forvaltningsplan for Naturnationalpark Bidstrupskovene"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71751": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Udkast til cirkulære om ophævelse af cirkulære nr. 13015 af 10. september 1946 om vedtægter for Jagt- og Skovbrugsmuseet i Hørsholm"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71748": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Vejledning om tilskud til pleje af græs- og naturarealer 2027 (tilsagnstype 68 og 69)"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71734": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Høring over udkast til bekendtgørelse om ophævelse af bekendtgørelse om hold af mårhund (Nyctereutes procyonoides) i fangenskab"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71726": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Høring af bekendtgørelse om produktionsafgift på arealer med planter"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71725": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Høring af bekendtgørelse om produktionsafgift ved slagtning og eksport af svin"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71722": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Bekendtgørelse om kompensation for udledningsbaseret markregulering i 2027"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71744": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Bekendtgørelse om betaling for myndighedsbehandling i Klima-, Energi- og Forsyningsministeriet"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71439": [
+      {
+        "dato": "2026-11-04",
+        "titel": "Bekendtgørelse om Klimarådets klimadialogforum"
+      }
     ]
   },
-  "last_updated": "2026-10-28T07:23:34.600841+00:00",
+  "last_updated": "2026-11-04T07:22:40.037582+00:00",
   "_note": "høring-URLs + historik for lovforslag og høringer."
 }
