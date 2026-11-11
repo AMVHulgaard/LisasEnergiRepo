@@ -1,21 +1,28 @@
 {
   "horinger_sete": [
+    "https://hoeringsportalen.dk/Hearing/Details/70523",
     "https://hoeringsportalen.dk/Hearing/Details/70531",
     "https://hoeringsportalen.dk/Hearing/Details/70776",
     "https://hoeringsportalen.dk/Hearing/Details/70800",
+    "https://hoeringsportalen.dk/Hearing/Details/71042",
+    "https://hoeringsportalen.dk/Hearing/Details/71071",
     "https://hoeringsportalen.dk/Hearing/Details/71074",
     "https://hoeringsportalen.dk/Hearing/Details/71218",
     "https://hoeringsportalen.dk/Hearing/Details/71227",
     "https://hoeringsportalen.dk/Hearing/Details/71228",
     "https://hoeringsportalen.dk/Hearing/Details/71240",
+    "https://hoeringsportalen.dk/Hearing/Details/71254",
     "https://hoeringsportalen.dk/Hearing/Details/71276",
     "https://hoeringsportalen.dk/Hearing/Details/71303",
     "https://hoeringsportalen.dk/Hearing/Details/71308",
+    "https://hoeringsportalen.dk/Hearing/Details/71321",
     "https://hoeringsportalen.dk/Hearing/Details/71325",
     "https://hoeringsportalen.dk/Hearing/Details/71377",
     "https://hoeringsportalen.dk/Hearing/Details/71398",
     "https://hoeringsportalen.dk/Hearing/Details/71405",
     "https://hoeringsportalen.dk/Hearing/Details/71415",
+    "https://hoeringsportalen.dk/Hearing/Details/71416",
+    "https://hoeringsportalen.dk/Hearing/Details/71419",
     "https://hoeringsportalen.dk/Hearing/Details/71439",
     "https://hoeringsportalen.dk/Hearing/Details/71451",
     "https://hoeringsportalen.dk/Hearing/Details/71469",
@@ -88,6 +95,11 @@
     "https://hoeringsportalen.dk/Hearing/Details/71755",
     "https://hoeringsportalen.dk/Hearing/Details/71756",
     "https://hoeringsportalen.dk/Hearing/Details/71757",
+    "https://hoeringsportalen.dk/Hearing/Details/71764",
+    "https://hoeringsportalen.dk/Hearing/Details/71771",
+    "https://hoeringsportalen.dk/Hearing/Details/71772",
+    "https://hoeringsportalen.dk/Hearing/Details/71785",
+    "https://hoeringsportalen.dk/Hearing/Details/71794",
     "https://www.ft.dk/samling/20252/lovforslag/L12/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L13/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L14/index.htm",
@@ -103,6 +115,8 @@
     "https://www.ft.dk/samling/20252/lovforslag/L70/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L71/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L75/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L81/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L91/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L93/index.htm"
   ],
   "historik": {
@@ -544,6 +558,10 @@
       {
         "dato": "2026-10-28",
         "titel": "Høring over bekendtgørelse om tilskud fra Grønt Program for omstilling af fiskeri og akvakultur"
+      },
+      {
+        "dato": "2026-11-11",
+        "titel": "Høring over bekendtgørelse om tilskud fra Grønt Program for omstilling af fiskeri og akvakultur"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71704": [
@@ -670,6 +688,10 @@
       {
         "dato": "2026-11-04",
         "titel": "Bekendtgørelse om kompensation for udledningsbaseret markregulering i 2027"
+      },
+      {
+        "dato": "2026-11-11",
+        "titel": "Bekendtgørelse om kompensation for udledningsbaseret markregulering i 2027"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71744": [
@@ -683,8 +705,100 @@
         "dato": "2026-11-04",
         "titel": "Bekendtgørelse om Klimarådets klimadialogforum"
       }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71254": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Revideret vejledning til omkostningsbekendtgørelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71321": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Fornyet høring - Høring af forslag til lov om ændring af lov om anvendelse af Danmarks undergrund"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71474": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Forslag til lov om ændring af lov om ændring af lov om betalingsregler for spildevandsforsyningsselskaber m.v. (Forlængelse af overgangsperiode for klimatilpasningsprojekter for tag- og overfladevand)"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71042": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Offentlig høring af Projektbeskrivelse og forvaltningsplan for Naturnationalpark Hanstholm"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71785": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Bekendtgørelse om støtte til Innovationscenter for Økologisk Landbrug"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/70523": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Forslag til gødskningslov"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71772": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Høring af bekendtgørelse om jagttid for visse pattedyr og fugle m.v."
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71764": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Høring over udkast til bekendtgørelse om ændring af bilag 2 til lov om miljøvurderinger"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71794": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Høring over udkast til bekendtgørelse om ændring af bekendtgørelse om gennemførelse af bygge- og anlægsprojekter i forbindelse med etablering af permanente indkvarteringsfaciliteter på 11 af Forsvarets etablissementer"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71416": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Høring over udkast til forslag til lov om ændring af lov om forsvarets formål, opgaver og organisation m.v., lov om radiofrekvenser og lov om radioudstyr og elektromagnetiske forhold (Forsvarets detektion, identifikation og sporing af ubemandede fartøjer)"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71419": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Høring over udkast til forslag til lov om arbejdsskadesikring for udsendt personel på statens område m.v."
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71771": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Høring over udkast til bekendtgørelse om gennemførelse af bygge- og anlægsprojekt i forbindelse med etablering af sikringsforanstaltninger ved Hoveddepot Dråby"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71071": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Ekstern høring af udkast til forslag til lov om ændring af lov om miljøbeskyttelse (Maksimal størrelse af gebyr og kommunalbestyrelsens periodisering af omkostninger under udvidet producentansvar for emballage)"
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L91/index.htm": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Forslag til lov om ændring af lov om anvendelse af Danmarks undergrund. (Supplerende bestemmelse om straf for manglende efterlevelse af krav om CO2-injektionskapacitet efter forordning om fastlæggelse af en ramme for foranstaltninger til styrkelse af Europas økosystem for fremstilling af nettonulteknologiprodukter).",
+        "status": ""
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L81/index.htm": [
+      {
+        "dato": "2026-11-11",
+        "titel": "Forslag til lov om ændring af kursgevinstloven. (Indførelse af realisationsbeskatning af visse længerevarende prissikringskontrakter).",
+        "status": ""
+      }
     ]
   },
-  "last_updated": "2026-11-04T07:22:40.037582+00:00",
+  "last_updated": "2026-11-11T07:25:02.049606+00:00",
   "_note": "høring-URLs + historik for lovforslag og høringer."
 }
