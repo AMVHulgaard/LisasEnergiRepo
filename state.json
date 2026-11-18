@@ -17,6 +17,7 @@
     "https://hoeringsportalen.dk/Hearing/Details/71308",
     "https://hoeringsportalen.dk/Hearing/Details/71321",
     "https://hoeringsportalen.dk/Hearing/Details/71325",
+    "https://hoeringsportalen.dk/Hearing/Details/71326",
     "https://hoeringsportalen.dk/Hearing/Details/71377",
     "https://hoeringsportalen.dk/Hearing/Details/71398",
     "https://hoeringsportalen.dk/Hearing/Details/71405",
@@ -100,6 +101,14 @@
     "https://hoeringsportalen.dk/Hearing/Details/71772",
     "https://hoeringsportalen.dk/Hearing/Details/71785",
     "https://hoeringsportalen.dk/Hearing/Details/71794",
+    "https://hoeringsportalen.dk/Hearing/Details/71800",
+    "https://hoeringsportalen.dk/Hearing/Details/71802",
+    "https://hoeringsportalen.dk/Hearing/Details/71808",
+    "https://hoeringsportalen.dk/Hearing/Details/71816",
+    "https://hoeringsportalen.dk/Hearing/Details/71837",
+    "https://hoeringsportalen.dk/Hearing/Details/71842",
+    "https://hoeringsportalen.dk/Hearing/Details/71843",
+    "https://hoeringsportalen.dk/Hearing/Details/71844",
     "https://www.ft.dk/samling/20252/lovforslag/L12/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L13/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L14/index.htm",
@@ -133,6 +142,10 @@
     "https://hoeringsportalen.dk/Hearing/Details/71546": [
       {
         "dato": "2026-10-02",
+        "titel": "Bekendtgørelse om integration af vedvarende brændstoffer, der ikke er af biologisk oprindelse til endelige energiformål og ikkeenergimæssige formål i industrien."
+      },
+      {
+        "dato": "2026-11-18",
         "titel": "Bekendtgørelse om integration af vedvarende brændstoffer, der ikke er af biologisk oprindelse til endelige energiformål og ikkeenergimæssige formål i industrien."
       }
     ],
@@ -218,6 +231,10 @@
       {
         "dato": "2026-10-21",
         "titel": "Høring over udkast til seks bekendtgørelser, herunder bekendtgørelse om prioritering af kapacitet i det kollektive elforsyningsnet"
+      },
+      {
+        "dato": "2026-11-18",
+        "titel": "Høring over udkast til seks bekendtgørelser, herunder bekendtgørelse om prioritering af kapacitet i det kollektive elforsyningsnet"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71074": [
@@ -302,6 +319,10 @@
       {
         "dato": "2026-10-21",
         "titel": "Høring over bekendtgørelse om tilskud til maritim viden til styrkelse af overvågningsindsatsen af bundfauna og havpattedyr"
+      },
+      {
+        "dato": "2026-11-18",
+        "titel": "Høring over bekendtgørelse om tilskud til maritim viden til styrkelse af overvågningsindsatsen af bundfauna og havpattedyr"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/71610": [
@@ -373,6 +394,10 @@
     "https://hoeringsportalen.dk/Hearing/Details/71596": [
       {
         "dato": "2026-10-14",
+        "titel": "Høring over udkast til bekendtgørelse om gennemførelse af bygge- og anlægsprojekt i forbindelse med etablering af faciliteter til Hærens tunge brigade på Aalborg Kaserne"
+      },
+      {
+        "dato": "2026-11-18",
         "titel": "Høring over udkast til bekendtgørelse om gennemførelse af bygge- og anlægsprojekt i forbindelse med etablering af faciliteter til Hærens tunge brigade på Aalborg Kaserne"
       }
     ],
@@ -646,6 +671,10 @@
       {
         "dato": "2026-11-04",
         "titel": "Høring over udkast til emballagebekendtgørelsen"
+      },
+      {
+        "dato": "2026-11-18",
+        "titel": "Høring over udkast til emballagebekendtgørelsen"
       }
     ],
     "https://hoeringsportalen.dk/Hearing/Details/70776": [
@@ -797,8 +826,62 @@
         "titel": "Forslag til lov om ændring af kursgevinstloven. (Indførelse af realisationsbeskatning af visse længerevarende prissikringskontrakter).",
         "status": ""
       }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71808": [
+      {
+        "dato": "2026-11-18",
+        "titel": "Høring over udkast til bekendtgørelse om gebyrer og honorarer for ydelser efter lov om fremme af energibesparelser i bygninger"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71802": [
+      {
+        "dato": "2026-11-18",
+        "titel": "Høring over udkast til bekendtgørelse om rådgivende interessentforum for Energinet"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71326": [
+      {
+        "dato": "2026-11-18",
+        "titel": "Høring over udkast til bekendtgørelse om vurdering og styring af luftkvaliteten"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71842": [
+      {
+        "dato": "2026-11-18",
+        "titel": "Bekendtgørelse om tilskud til skolefrugt og -grønt i skoleåret 2027"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71816": [
+      {
+        "dato": "2026-11-18",
+        "titel": "Høring over forslag til lov om ændring af dyrevelfærdsloven, retsplejeloven og straffeloven"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71800": [
+      {
+        "dato": "2026-11-18",
+        "titel": "Bekendtgørelse om ændring af bekendtgørelse om tilskud til fastholdelse af arealer i vand- og klimaprojekter"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71837": [
+      {
+        "dato": "2026-11-18",
+        "titel": "Bekendtgørelse om henlæggelse af visse opgaver og beføjelser til Erhvervsstyrelsen efter lov om rørført transport af CO2 og afskæring af administrativ rekurs af afgørelser truffet af Erhvervsstyrelsen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71843": [
+      {
+        "dato": "2026-11-18",
+        "titel": "Fejloprettet"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71844": [
+      {
+        "dato": "2026-11-18",
+        "titel": "Høring over udkast til bekendtgørelse om gennemførelse af bygge- og anlægsprojekt i forbindelse med etablering af faciliteter til NATO-signalbataljon på Haderslev Kaserne"
+      }
     ]
   },
-  "last_updated": "2026-11-11T07:25:02.049606+00:00",
+  "last_updated": "2026-11-18T07:24:38.364467+00:00",
   "_note": "høring-URLs + historik for lovforslag og høringer."
 }
