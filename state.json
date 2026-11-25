@@ -1,5 +1,6 @@
 {
   "horinger_sete": [
+    "https://hoeringsportalen.dk/Hearing/Details/69895",
     "https://hoeringsportalen.dk/Hearing/Details/70523",
     "https://hoeringsportalen.dk/Hearing/Details/70531",
     "https://hoeringsportalen.dk/Hearing/Details/70776",
@@ -15,6 +16,7 @@
     "https://hoeringsportalen.dk/Hearing/Details/71276",
     "https://hoeringsportalen.dk/Hearing/Details/71303",
     "https://hoeringsportalen.dk/Hearing/Details/71308",
+    "https://hoeringsportalen.dk/Hearing/Details/71309",
     "https://hoeringsportalen.dk/Hearing/Details/71321",
     "https://hoeringsportalen.dk/Hearing/Details/71325",
     "https://hoeringsportalen.dk/Hearing/Details/71326",
@@ -109,6 +111,13 @@
     "https://hoeringsportalen.dk/Hearing/Details/71842",
     "https://hoeringsportalen.dk/Hearing/Details/71843",
     "https://hoeringsportalen.dk/Hearing/Details/71844",
+    "https://hoeringsportalen.dk/Hearing/Details/71863",
+    "https://hoeringsportalen.dk/Hearing/Details/71867",
+    "https://hoeringsportalen.dk/Hearing/Details/71868",
+    "https://hoeringsportalen.dk/Hearing/Details/71882",
+    "https://hoeringsportalen.dk/Hearing/Details/71883",
+    "https://www.ft.dk/samling/20252/lovforslag/L104/index.htm",
+    "https://www.ft.dk/samling/20252/lovforslag/L105/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L12/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L13/index.htm",
     "https://www.ft.dk/samling/20252/lovforslag/L14/index.htm",
@@ -192,6 +201,10 @@
       },
       {
         "dato": "2026-10-14",
+        "titel": "Høring over miljørapport vedr. ændring af CAP-planen 2023 - 2027"
+      },
+      {
+        "dato": "2026-11-25",
         "titel": "Høring over miljørapport vedr. ændring af CAP-planen 2023 - 2027"
       }
     ],
@@ -880,8 +893,64 @@
         "dato": "2026-11-18",
         "titel": "Høring over udkast til bekendtgørelse om gennemførelse af bygge- og anlægsprojekt i forbindelse med etablering af faciliteter til NATO-signalbataljon på Haderslev Kaserne"
       }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71883": [
+      {
+        "dato": "2026-11-25",
+        "titel": "Vejledning om økologisk jordbrugsproduktion 2027"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71868": [
+      {
+        "dato": "2026-11-25",
+        "titel": "Bekendtgørelse om gebyrer for tilladelser til dyreforsøg"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71867": [
+      {
+        "dato": "2026-11-25",
+        "titel": "Ændring af bekendtgørelse om jordbrugets anvendelse af gødning i planperioden 2026/2027"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71309": [
+      {
+        "dato": "2026-11-25",
+        "titel": "Høring af udkast til Plantedækkebekendtgørelsen 2026/2027 og ændringsbekendtgørelse 2025/2026"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71882": [
+      {
+        "dato": "2026-11-25",
+        "titel": "Høring over afgrænsningsnotat"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/71863": [
+      {
+        "dato": "2026-11-25",
+        "titel": "Bekendtgørelse om regulering af erhvervsmæssigt fiskeri af anden fladfisk end rødspætte fra dansk indregistrerede fiskerfartøjer i tysk farvand i Østersøen"
+      }
+    ],
+    "https://hoeringsportalen.dk/Hearing/Details/69895": [
+      {
+        "dato": "2026-11-25",
+        "titel": "Tilstandsvurdering – Havstrategi III"
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L104/index.htm": [
+      {
+        "dato": "2026-11-25",
+        "titel": "Forslag til lov om ændring af lov om energiafgift af mineralolieprodukter m.v. (Lempelse af afgiften på benzin og diesel som motorbrændstof i december 2026).",
+        "status": ""
+      }
+    ],
+    "https://www.ft.dk/samling/20252/lovforslag/L105/index.htm": [
+      {
+        "dato": "2026-11-25",
+        "titel": "Forslag til lov om ændring af lov om energiafgift af mineralolieprodukter m.v. og registreringsafgiftsloven. (Lempelse af afgiften på benzin og diesel som motorbrændstof i 2027 og udskydelse af forhøjelsen af registreringsafgift for nulemissionskøretøjer med 1 år).",
+        "status": ""
+      }
     ]
   },
-  "last_updated": "2026-11-18T07:24:38.364467+00:00",
+  "last_updated": "2026-11-25T07:22:58.819350+00:00",
   "_note": "høring-URLs + historik for lovforslag og høringer."
 }
